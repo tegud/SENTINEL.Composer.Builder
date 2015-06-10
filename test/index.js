@@ -33,16 +33,6 @@ describe('SENTINEL.Composer', function() {
 				],
 				publishers: [
 					{ type: 'udp', host: '127.0.0.1', port: 1235 }
-				],
-				aggregators: [
-					{
-						type: 'session',
-						factory: 'session'
-					},
-					{
-						type: 'crossApplicationRequest',
-						factory: 'crossApplicationRequest'
-					}
 				]
 			});
 
