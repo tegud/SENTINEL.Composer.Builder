@@ -1,0 +1,15 @@
+{
+	"stores": {
+		"redis": {
+			"type": "redis",
+			"host": "192.168.50.7",
+			"port": 6379
+		}
+	},
+	"listeners": [
+		{ "type": "udp", "port": 1234 }
+	],
+	"publishers": [
+		{ "type": "udp", "host": "127.0.0.1", "port": 1235 }
+	]
+}

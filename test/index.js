@@ -6,19 +6,86 @@ var Promise = require('bluebird');
 var fs = require('fs');
 var fakeRedis = require('./fake-redis');
 var Server = proxyquire('../lib/server', {
-	'./stores/redis': proxyquire('../lib/stores/redis', {
-		'redis': fakeRedis
+	'./config': proxyquire('../lib/config', {
+		'../stores/redis': proxyquire('../lib/stores/redis', {
+			'redis': fakeRedis
+		})
 	})
 });
 var _ = require('lodash');
 var moment = require('moment');
 
-describe('SENTINEL.Composer', function() {
-	describe('event is inputted via udp', function() {
-		var udpClient;
-		var server;
-		var port = 1234;
+describe('Composer.Builder', function() {
+	var udpClient;
+	var server;
+	var port = 1234;
 
+	afterEach(function(done) {
+		udpClient.close();
+		eventEmitter.removeAllListeners();
+
+		server.stop().then(done);
+
+		server = null;
+
+		fakeRedis.clearData();
+	});
+
+	function sendTest(testData, gapBetween) {
+		var currentTestItem = JSON.stringify(testData.shift());
+		var message = new Buffer(currentTestItem);
+
+		udpClient.send(message, 0, message.length, port, "localhost", function() {
+			if(testData.length) {
+				setTimeout(function() {
+					sendTest(testData, gapBetween);
+				}, gapBetween);
+			}
+		});
+	}
+
+	function loadTestData(fileName) {
+		var testData = fs.readFileSync(__dirname + '/data/' + fileName, 'utf-8');
+
+		return JSON.parse(testData);
+	}
+
+	function cloneData(data) {
+		return JSON.parse(JSON.stringify(data));
+	}
+
+	function generateRedisListKey(type, key) {
+		return type + '_list_' + key;
+	}
+
+	function populateRedisData(type, key, file) {
+		var testData = loadTestData(file);
+
+		fakeRedis.setKeyData(generateRedisListKey(type, key), _.map(testData, function(row) { return JSON.stringify(row); }));
+	}
+
+	function generateKeyObject(type, key) {
+		return {
+			expiredEventTimeStamp: moment().format(),
+			aggregatorType: type,
+			expiredKey: key,
+			factory: type,
+			store: {
+				name: 'redis',
+				eventListKey: generateRedisListKey(type, key)
+			}
+		};
+	}
+
+	function populateRedisAndSetExpiredKeyMessage(type, key, dataFile) {
+		var expiredKeyMessage = new Buffer(JSON.stringify(generateKeyObject(type, key)));
+
+		populateRedisData(type, key, dataFile);
+
+		udpClient.send(expiredKeyMessage, 0, expiredKeyMessage.length, port, "localhost");
+	}
+
+	describe('event is inputted via udp', function() {
 		beforeEach(function(done) {
 			server = new Server({
 				stores: {
@@ -44,71 +111,6 @@ describe('SENTINEL.Composer', function() {
 
 			eventEmitter = new EventEmitter();
 		});
-
-		afterEach(function(done) {
-			udpClient.close();
-			eventEmitter.removeAllListeners();
-
-			server.stop().then(done);
-
-			server = null;
-
-			fakeRedis.clearData();
-		});
-
-		function sendTest(testData, gapBetween) {
-			var currentTestItem = JSON.stringify(testData.shift());
-			var message = new Buffer(currentTestItem);
-
-			udpClient.send(message, 0, message.length, port, "localhost", function() {
-				if(testData.length) {
-					setTimeout(function() {
-						sendTest(testData, gapBetween);
-					}, gapBetween);
-				}
-			});
-		}
-
-		function loadTestData(fileName) {
-			var testData = fs.readFileSync(__dirname + '/data/' + fileName, 'utf-8');
-
-			return JSON.parse(testData);
-		}
-
-		function cloneData(data) {
-			return JSON.parse(JSON.stringify(data));
-		}
-
-		function generateRedisListKey(type, key) {
-			return type + '_list_' + key;
-		}
-
-		function populateRedisData(type, key, file) {
-			var testData = loadTestData(file);
-
-			fakeRedis.setKeyData(generateRedisListKey(type, key), _.map(testData, function(row) { return JSON.stringify(row); }));
-		}
-
-		function generateKeyObject(type, key) {
-			return {
-				expiredEventTimeStamp: moment().format(),
-				aggregatorType: type,
-				expiredKey: key,
-				factory: type,
-				store: {
-					name: 'redis',
-					eventListKey: generateRedisListKey(type, key)
-				}
-			};
-		}
-
-		function populateRedisAndSetExpiredKeyMessage(type, key, dataFile) {
-			var expiredKeyMessage = new Buffer(JSON.stringify(generateKeyObject(type, key)));
-
-			populateRedisData(type, key, dataFile);
-
-			udpClient.send(expiredKeyMessage, 0, expiredKeyMessage.length, port, "localhost");
-		}
 
 		describe('creates new session object', function() {
 			describe('sets requests', function() {
@@ -427,5 +429,37 @@ describe('SENTINEL.Composer', function() {
 				});
 			});
 		});
+	});
+
+	describe('config can be loaded from file', function() {
+		beforeEach(function(done) {
+			server = new Server();
+
+			server.loadConfigFromFile(__dirname + '/config/test.json');
+
+			server.start().then(done);
+
+			udpClient = dgram.createSocket("udp4");
+
+			udpClient.bind(1235);
+
+			eventEmitter = new EventEmitter();
+		});
+
+		it('configures listeners, aggregators and publishers', function(done) {
+			populateRedisAndSetExpiredKeyMessage('session', '104e9439-63de-4373-95ff-6dfa365e4951', 'three.json');
+
+			udpClient.on("message", function messageReceived(msg) {
+				var data = msg.toString('utf-8');
+				var parsedData = JSON.parse(data);
+
+				if(parsedData.type !== 'session') {
+					return;
+				}
+
+				expect(parsedData.requests.total).to.be(3);
+				done();
+			});
+		});	
 	});
 });
