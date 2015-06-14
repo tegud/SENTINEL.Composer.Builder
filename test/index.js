@@ -24,7 +24,7 @@ describe('Composer.Builder', function() {
 		udpClient.close();
 		eventEmitter.removeAllListeners();
 
-		server.stop().then(done);
+		server.stop().then(done.bind(undefined, undefined));
 
 		server = null;
 
