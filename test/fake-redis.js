@@ -25,6 +25,10 @@ module.exports = {
 				if(event === 'pmessage') {
 					pmessageHandler = handler;
 				}
+
+				if(event === 'ready') {
+					handler();
+				}
 			},
 			quit: function() {
 				pmessageHandler = undefined;
