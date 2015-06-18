@@ -65,6 +65,7 @@ describe('ratesAccuracyCheck', function() {
 		});
 
 		it('sets date', function() {
+			var moment = require('moment');
 			console.log(moment.unix("1435878000").format("YYYY-MM-DD"));
 			console.log(moment.unix("1435878000").format());
 
