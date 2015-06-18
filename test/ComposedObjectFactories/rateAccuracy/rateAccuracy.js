@@ -65,6 +65,9 @@ describe('ratesAccuracyCheck', function() {
 		});
 
 		it('sets date', function() {
+			console.log(moment.unix("1435878000").format("YYYY-MM-DD"));
+			console.log(moment.unix("1435878000").format());
+
 			expect(buildRequest({
 				events: [
 					{
