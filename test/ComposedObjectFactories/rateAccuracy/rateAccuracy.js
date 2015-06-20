@@ -5,13 +5,15 @@ var Promise = require('bluebird');
 var buildRequest = proxyquire('../../../lib/ComposedObjectFactories/ratesAccuracy', {
 	'../../config': {
 		lookupStore: function() {
-			return {
-				getJsonForKey: function(key) {
-					return new Promise(function(resolve) {
-						resolve(fakeRedisData[key]);
-					});
-				}
-			};
+			return new Promise(function(resolve) {
+				resolve({
+					getJsonForKey: function(key) {
+						return new Promise(function(resolve) {
+							resolve(fakeRedisData[key]);
+						});
+					}
+				});
+			});
 		}
 	}
 });
