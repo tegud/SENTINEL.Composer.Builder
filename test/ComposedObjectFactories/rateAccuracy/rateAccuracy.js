@@ -877,7 +877,7 @@ describe('ratesAccuracyCheck', function() {
 					buildRequest({
 						events: parsedData
 					}).then(function(result) {
-						expect(result[2].rateDifference).to.eql(3.21);
+						expect(result[2].difference).to.be(3.21);
 						done();
 					});
 				});
@@ -889,7 +889,7 @@ describe('ratesAccuracyCheck', function() {
 					buildRequest({
 						events: parsedData
 					}).then(function(result) {
-						expect(result[2].rateDifferencePercentage).to.eql(100.58);
+						expect(result[2].percentageDifference).to.be(100.58);
 						done();
 					});
 				});
