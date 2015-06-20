@@ -3,19 +3,21 @@ var fs = require('fs');
 var proxyquire = require('proxyquire');
 var Promise = require('bluebird');
 var buildRequest = proxyquire('../../../lib/ComposedObjectFactories/ratesAccuracy', {
-	'../../config': {
-		lookupStore: function() {
-			return new Promise(function(resolve) {
-				resolve({
-					getJsonForKey: function(key) {
-						return new Promise(function(resolve) {
-							resolve(fakeRedisData[key]);
-						});
-					}
+	'./hotelData': proxyquire('../../../lib/ComposedObjectFactories/ratesAccuracy/hotelData', {
+		'../../config': {
+			lookupStore: function() {
+				return new Promise(function(resolve) {
+					resolve({
+						getJsonForKey: function(key) {
+							return new Promise(function(resolve) {
+								resolve(fakeRedisData[key]);
+							});
+						}
+					});
 				});
-			});
+			}
 		}
-	}
+	}) 
 });
 
 var fakeRedisData = {};
@@ -804,6 +806,7 @@ describe('ratesAccuracyCheck', function() {
 			buildRequest({
 				events: parsedData
 			}).then(function(result) {
+				console.log(result);
 				expect(result[0].hotelDetailsRate).to.eql(501.01);
 				done();
 			});
