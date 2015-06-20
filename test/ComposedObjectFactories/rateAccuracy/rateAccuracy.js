@@ -889,7 +889,7 @@ describe('ratesAccuracyCheck', function() {
 					buildRequest({
 						events: parsedData
 					}).then(function(result) {
-						expect(result[2].percentageDifference).to.be(100.58);
+						expect(result[2].percentageDifference).to.be(0.58);
 						done();
 					});
 				});
