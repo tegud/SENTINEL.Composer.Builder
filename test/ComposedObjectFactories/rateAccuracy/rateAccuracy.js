@@ -119,6 +119,31 @@ describe('ratesAccuracyCheck', function() {
 			});
 		});
 
+		it('sets Commission provider to LateRooms', function(done) {
+			fakeRedisData['hotel_195042'] = { providerName: 'Commission' };
+
+			buildRequest({
+				events: [
+					{
+						"@timestamp": "2015-06-17T13:53:35.814Z",
+						"type": "lr_varnish_request",
+						"url": "/beacon/hotelDetailsAccuracy?hotelId=195042&rate=503.89&searchId=1ec79c06-dd05-4f3d-8b9a-a7a49b142e05&date=1435878000&nights=3&adults=2&children=0",
+						"@type": "lr_varnish_request",
+						"url_querystring_hotelId": "195042",
+						"url_querystring_rate": "503.89",
+						"url_querystring_searchId": "1ec79c06-dd05-4f3d-8b9a-a7a49b142e05",
+						"url_querystring_date": "1435878000",
+						"url_querystring_nights": "3",
+						"url_querystring_adults": "2",
+						"url_querystring_children": "0"
+					}
+				]
+			}).then(function(result) {
+				expect(result.hotelDetails.providerName).to.be('LateRooms');
+				done();
+			});
+		});
+
 		it('sets searchId', function(done) {
 			buildRequest({
 				events: [
