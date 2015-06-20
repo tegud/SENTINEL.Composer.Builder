@@ -1,10 +1,26 @@
 var expect = require('expect.js');
 var fs = require('fs');
-var buildRequest = require('../../../lib/ComposedObjectFactories/ratesAccuracy');
+var proxyquire = require('proxyquire');
+var Promise = require('bluebird');
+var buildRequest = proxyquire('../../../lib/ComposedObjectFactories/ratesAccuracy', {
+	'../../config': {
+		lookupStore: function() {
+			return {
+				getJsonForKey: function(key) {
+					return new Promise(function(resolve) {
+						resolve(fakeRedisData[key]);
+					});
+				}
+			};
+		}
+	}
+});
+
+var fakeRedisData = {};
 
 describe('ratesAccuracyCheck', function() {
-	it('sets type to "cross_application_request".', function() {
-		expect(buildRequest({
+	it('sets type to "cross_application_request".', function(done) {
+		buildRequest({
 			events: [
 				{
 					"@timestamp": "2015-06-17T13:53:35.814Z",
@@ -20,11 +36,14 @@ describe('ratesAccuracyCheck', function() {
 					"url_querystring_children": "0"
 				}
 			]
-		}).type).to.be('rates_accuracy_result');
+		}).then(function(result) {
+			expect(result.type).to.be('rates_accuracy_result');
+			done();
+		});
 	});
 
-	it('sets hotelDetailsPresent to false when no hotel details request.', function() {
-		expect(buildRequest({
+	it('sets hotelDetailsPresent to false when no hotel details request.', function(done) {
+		buildRequest({
 			events: [
 				{
 					"@timestamp": "2015-06-17T13:53:35.814Z",
@@ -43,12 +62,15 @@ describe('ratesAccuracyCheck', function() {
 					"url_querystring_children": "0"
 				}
 			]
-		}).hotelDetailsPresent).to.be(false);
+		}).then(function(result) {
+			expect(result.hotelDetailsPresent).to.be(false);
+			done();
+		});
 	});
 
 	describe('single search and hotel details request', function() {
-		it('sets hotelId', function() {
-			expect(buildRequest({
+		it('sets hotelId', function(done) {
+			buildRequest({
 				events: [
 					{
 						"@timestamp": "2015-06-17T13:53:35.814Z",
@@ -64,11 +86,16 @@ describe('ratesAccuracyCheck', function() {
 						"url_querystring_children": "0"
 					}
 				]
-			}).hotelId).to.be(195042);
+			}).then(function(result) {
+				expect(result.hotelId).to.be(195042);
+				done();
+			});
 		});
 
-		it('sets searchId', function() {
-			expect(buildRequest({
+		it('sets hotel details provider', function(done) {
+			fakeRedisData['hotel_195042'] = { providerName: 'HotelProvider' };
+
+			buildRequest({
 				events: [
 					{
 						"@timestamp": "2015-06-17T13:53:35.814Z",
@@ -84,15 +111,39 @@ describe('ratesAccuracyCheck', function() {
 						"url_querystring_children": "0"
 					}
 				]
-			}).searchId).to.be("1ec79c06-dd05-4f3d-8b9a-a7a49b142e05");
+			}).then(function(result) {
+				expect(result.hotelDetails.providerName).to.be('HotelProvider');
+				done();
+			});
 		});
 
-		it.skip('sets date', function() {
+		it('sets searchId', function(done) {
+			buildRequest({
+				events: [
+					{
+						"@timestamp": "2015-06-17T13:53:35.814Z",
+						"type": "lr_varnish_request",
+						"url": "/beacon/hotelDetailsAccuracy?hotelId=195042&rate=503.89&searchId=1ec79c06-dd05-4f3d-8b9a-a7a49b142e05&date=1435878000&nights=3&adults=2&children=0",
+						"@type": "lr_varnish_request",
+						"url_querystring_hotelId": "195042",
+						"url_querystring_rate": "503.89",
+						"url_querystring_searchId": "1ec79c06-dd05-4f3d-8b9a-a7a49b142e05",
+						"url_querystring_date": "1435878000",
+						"url_querystring_nights": "3",
+						"url_querystring_adults": "2",
+						"url_querystring_children": "0"
+					}
+				]
+			}).then(function(result) {
+				expect(result.searchId).to.be("1ec79c06-dd05-4f3d-8b9a-a7a49b142e05");
+				done();
+			});
+		});
+
+		it.skip('sets date', function(done) {
 			var moment = require('moment');
-			console.log(moment.unix("1435878000").format("YYYY-MM-DD"));
-			console.log(moment.unix("1435878000").format());
 
-			expect(buildRequest({
+			buildRequest({
 				events: [
 					{
 						"@timestamp": "2015-06-17T13:53:35.814Z",
@@ -108,11 +159,14 @@ describe('ratesAccuracyCheck', function() {
 						"url_querystring_children": "0"
 					}
 				]
-			}).date).to.be("2015-07-03");
+			}).then(function(result) {
+				expect(result.date).to.be("2015-07-03");
+				done();
+			});
 		});
 
-		it('sets nights', function() {
-			expect(buildRequest({
+		it('sets nights', function(done) {
+			buildRequest({
 				events: [
 					{
 						"@timestamp": "2015-06-17T13:53:35.814Z",
@@ -128,11 +182,14 @@ describe('ratesAccuracyCheck', function() {
 						"url_querystring_children": "0"
 					}
 				]
-			}).nights).to.be(3);
+			}).then(function(result) {
+				expect(result.nights).to.be(3);
+				done();
+			});
 		});
 
-		it('sets adults', function() {
-			expect(buildRequest({
+		it('sets adults', function(done) {
+			buildRequest({
 				events: [
 					{
 						"@timestamp": "2015-06-17T13:53:35.814Z",
@@ -148,11 +205,15 @@ describe('ratesAccuracyCheck', function() {
 						"url_querystring_children": "0"
 					}
 				]
-			}).adults).to.be(2);
+			}).then(function(result) {
+				expect(result.adults).to.be(2);
+				done();
+			});
+
 		});
 
-		it('sets children', function() {
-			expect(buildRequest({
+		it('sets children', function(done) {
+			buildRequest({
 				events: [
 					{
 						"@timestamp": "2015-06-17T13:53:35.814Z",
@@ -168,11 +229,15 @@ describe('ratesAccuracyCheck', function() {
 						"url_querystring_children": "0"
 					}
 				]
-			}).children).to.be(0);
+			}).then(function(result) {
+				expect(result.children).to.be(0);
+				done();
+			});
+
 		});
 
-		it('sets searchRate', function() {
-			expect(buildRequest({
+		it('sets searchRate', function(done) {
+			buildRequest({
 				events: [
 					{
 						"@timestamp": "2015-06-17T13:53:35.814Z",
@@ -191,11 +256,15 @@ describe('ratesAccuracyCheck', function() {
 						"url_querystring_children": "0"
 					}
 				]
-			}).searchRate).to.be(503.89);
+			}).then(function(result) {
+				expect(result.searchRate).to.be(503.89);
+				done();
+			});
+
 		});
 
-		it('sets hotelDetailsRate', function() {
-			expect(buildRequest({
+		it('sets hotelDetailsRate', function(done) {
+			buildRequest({
 				events: [
 					{
 						"@timestamp": "2015-06-17T13:53:35.814Z",
@@ -230,11 +299,15 @@ describe('ratesAccuracyCheck', function() {
 						"url_querystring_children": "0"
 					}
 				]
-			}).hotelDetailsRate).to.be(501.01);
+			}).then(function(result) {
+				expect(result.hotelDetailsRate).to.be(501.01);
+				done();
+			});
+
 		});
 
-		it('sets corrects order', function() {
-			expect(buildRequest({
+		it('sets corrects order', function(done) {
+			buildRequest({
 				events: [
 					{
 						"@timestamp": "2015-06-17T13:53:39.999Z",
@@ -269,11 +342,14 @@ describe('ratesAccuracyCheck', function() {
 						"url_querystring_children": "0"
 					}
 				]
-			}).hotelDetailsPresent).to.be(true);
+			}).then(function(result) {
+				expect(result.hotelDetailsPresent).to.be(true);
+				done();
+			});
 		});
 
-		it('corrects for client order mistmatch', function() {
-			expect(buildRequest({
+		it('corrects for client order mistmatch', function(done) {
+			buildRequest({
 				events: [
 					{
 						"@timestamp": "2015-06-17T13:53:39.999Z",
@@ -308,11 +384,15 @@ describe('ratesAccuracyCheck', function() {
 						"url_querystring_children": "0"
 					}
 				]
-			}).hotelDetailsPresent).to.be(true);
+			}).then(function(result) {
+				expect(result.hotelDetailsPresent).to.be(true);
+				done();
+			});
+
 		});
 
-		it('sets hotelDetailsPresent to false when no hotel details request.', function() {
-			expect(buildRequest({
+		it('sets hotelDetailsPresent to false when no hotel details request.', function(done) {
+			buildRequest({
 				events: [
 					{
 						"@timestamp": "2015-06-17T13:53:35.814Z",
@@ -347,11 +427,15 @@ describe('ratesAccuracyCheck', function() {
 						"url_querystring_children": "0"
 					}
 				]
-			}).hotelDetailsPresent).to.be(true);
+			}).then(function(result) {
+				expect(result.hotelDetailsPresent).to.be(true);
+				done();
+			});
+
 		});
 
-		it('sets availabilityStatus', function() {
-			expect(buildRequest({
+		it('sets availabilityStatus', function(done) {
+			buildRequest({
 				events: [
 					{
 						"@timestamp": "2015-06-17T13:53:35.814Z",
@@ -386,12 +470,15 @@ describe('ratesAccuracyCheck', function() {
 						"url_querystring_children": "0"
 					}
 				]
-			}).availabilityStatus).to.be('OK');
+			}).then(function(result) {
+				expect(result.availabilityStatus).to.be('OK');
+				done();
+			});
 		});
 
 		describe('when search availability but no hotel details availability', function() {
-			it('sets setsAvailabilityStatus', function() {
-				expect(buildRequest({
+			it('sets setsAvailabilityStatus', function(done) {
+				buildRequest({
 					events: [
 						{
 							"@timestamp": "2015-06-17T13:53:35.814Z",
@@ -425,11 +512,14 @@ describe('ratesAccuracyCheck', function() {
 							"url_querystring_children": "0"
 						}
 					]
-				}).availabilityStatus).to.be('ERROR');
+				}).then(function(result) {
+					expect(result.availabilityStatus).to.be('ERROR');
+					done();
+				});
 			});
 
-			it('sets setsAvailabilityMissing', function() {
-				expect(buildRequest({
+			it('sets setsAvailabilityMissing', function(done) {
+				buildRequest({
 					events: [
 						{
 							"@timestamp": "2015-06-17T13:53:35.814Z",
@@ -463,13 +553,16 @@ describe('ratesAccuracyCheck', function() {
 							"url_querystring_children": "0"
 						}
 					]
-				}).availabilityMissing).to.be('HotelDetails');
+				}).then(function(result) {
+					expect(result.availabilityMissing).to.be('HotelDetails');
+					done();
+				});
 			});
 		});
 
 		describe('when no search availability but hotel details availability', function() {
-			it('sets setsAvailabilityStatus', function() {
-				expect(buildRequest({
+			it('sets setsAvailabilityStatus', function(done) {
+				buildRequest({
 					events: [
 						{
 							"@timestamp": "2015-06-17T13:53:35.814Z",
@@ -503,11 +596,15 @@ describe('ratesAccuracyCheck', function() {
 							"url_querystring_children": "0"
 						}
 					]
-				}).availabilityStatus).to.be('ERROR');
+				}).then(function(result) {
+					expect(result.availabilityStatus).to.be('ERROR');
+					done();
+				});
+
 			});
 
-			it('sets setsAvailabilityMissing', function() {
-				expect(buildRequest({
+			it('sets setsAvailabilityMissing', function(done) {
+				buildRequest({
 					events: [
 						{
 							"@timestamp": "2015-06-17T13:53:35.814Z",
@@ -541,13 +638,16 @@ describe('ratesAccuracyCheck', function() {
 							"url_querystring_children": "0"
 						}
 					]
-				}).availabilityMissing).to.be('Search');
+				}).then(function(result) {
+					expect(result.availabilityMissing).to.be('Search');
+					done();
+				});
 			});
 		});
 
 		describe('when no search availability and no hotel details availability', function() {
-			it('sets setsAvailabilityStatus', function() {
-				expect(buildRequest({
+			it('sets setsAvailabilityStatus', function(done) {
+				buildRequest({
 					events: [
 						{
 							"@timestamp": "2015-06-17T13:53:35.814Z",
@@ -579,11 +679,15 @@ describe('ratesAccuracyCheck', function() {
 							"url_querystring_children": "0"
 						}
 					]
-				}).availabilityStatus).to.be('OK');
+				}).then(function(result) {
+					expect(result.availabilityStatus).to.be('OK');
+					done();
+				});
+
 			});
 
-			it('sets setsAvailabilityMissing', function() {
-				expect(buildRequest({
+			it('sets setsAvailabilityMissing', function(done) {
+				buildRequest({
 					events: [
 						{
 							"@timestamp": "2015-06-17T13:53:35.814Z",
@@ -616,115 +720,151 @@ describe('ratesAccuracyCheck', function() {
 							"url_querystring_children": "0"
 						}
 					]
-				}).availabilityMissing).to.be('SearchAndHotelDetails');
+				}).then(function(result) {
+					expect(result.availabilityMissing).to.be('SearchAndHotelDetails');
+					done();
+				});
 			});
 		});
 	});
 
 	describe('multiple search requests then hotel details requests are handled', function() {
-		it('rate comparison is of hotel details request immediately after a search', function() {
+		it('rate comparison is of hotel details request immediately after a search', function(done) {
 			var fileData = fs.readFileSync(__dirname + '/data/complexOrder.json');
 			var parsedData = JSON.parse(fileData);
 
-			expect(buildRequest({
+			buildRequest({
 				events: parsedData
-			})[0].hotelDetailsRate).to.eql(501.01);
+			}).then(function(result) {
+				expect(result[0].hotelDetailsRate).to.eql(501.01);
+				done();
+			});
 		});
 
 		describe('multiple accuracy reports are fired for multiple hotel details accuracy reports for the same hotel', function() {
 			describe('second accuracy report', function() {
-				it('sets hotel details rate', function() {
+				it('sets hotel details rate', function(done) {
 					var fileData = fs.readFileSync(__dirname + '/data/complexOrder.json');
 					var parsedData = JSON.parse(fileData);
 
-					expect(buildRequest({
+					buildRequest({
 						events: parsedData
-					})[1].hotelDetailsRate).to.eql(353.66);
+					}).then(function(result) {
+						expect(result[1].hotelDetailsRate).to.eql(353.66);
+						done();
+					});
 				});
 
-				it('sets accuracy report number', function() {
+				it('sets accuracy report number', function(done) {
 					var fileData = fs.readFileSync(__dirname + '/data/complexOrder.json');
 					var parsedData = JSON.parse(fileData);
 
-					expect(buildRequest({
+					buildRequest({
 						events: parsedData
-					})[1].number).to.eql(2);
+					}).then(function(result) {
+						expect(result[1].number).to.eql(2);
+						done();
+					});
 				});
 
-				it('sets hotelId', function() {
+				it('sets hotelId', function(done) {
 					var fileData = fs.readFileSync(__dirname + '/data/complexOrder.json');
 					var parsedData = JSON.parse(fileData);
 
-					expect(buildRequest({
+					buildRequest({
 						events: parsedData
-					})[1].hotelId).to.eql(195042);
+					}).then(function(result) {
+						expect(result[1].hotelId).to.eql(195042);
+						done();
+					});
 				});
 
-				it('sets @timestamp', function() {
+				it('sets @timestamp', function(done) {
 					var fileData = fs.readFileSync(__dirname + '/data/complexOrder.json');
 					var parsedData = JSON.parse(fileData);
 
-					expect(buildRequest({
+					buildRequest({
 						events: parsedData
-					})[1]['@timestamp']).to.eql('2015-06-17T13:53:50.694Z');
+					}).then(function(result) {
+						expect(result[1]['@timestamp']).to.eql('2015-06-17T13:53:50.694Z');
+						done();
+					});
 				});
 			});
 		});
 
 		describe('multiple accuracy reports are fired for multiple hotel details accuracy reports for the same hotel', function() {
 			describe('third accuracy report', function() {
-				it('sets hotelId', function() {
+				it('sets hotelId', function(done) {
 					var fileData = fs.readFileSync(__dirname + '/data/complexOrder.json');
 					var parsedData = JSON.parse(fileData);
 
-					expect(buildRequest({
+					buildRequest({
 						events: parsedData
-					})[2].hotelId).to.eql(145945);
+					}).then(function(result) {
+						expect(result[2].hotelId).to.eql(145945);
+						done();
+					});
 				});
 
-				it('sets accuracy report number', function() {
+				it('sets accuracy report number', function(done) {
 					var fileData = fs.readFileSync(__dirname + '/data/complexOrder.json');
 					var parsedData = JSON.parse(fileData);
 
-					expect(buildRequest({
+					buildRequest({
 						events: parsedData
-					})[2].number).to.eql(1);
+					}).then(function(result) {
+						expect(result[2].number).to.eql(1);
+						done();
+					});
 				});
 
-				it('sets search rate', function() {
+				it('sets search rate', function(done) {
 					var fileData = fs.readFileSync(__dirname + '/data/complexOrder.json');
 					var parsedData = JSON.parse(fileData);
 
-					expect(buildRequest({
+					buildRequest({
 						events: parsedData
-					})[2].searchRate).to.eql(559.75);
+					}).then(function(result) {
+						expect(result[2].searchRate).to.eql(559.75);
+						done();
+					});
 				});
 
-				it('sets hotel details rate', function() {
+				it('sets hotel details rate', function(done) {
 					var fileData = fs.readFileSync(__dirname + '/data/complexOrder.json');
 					var parsedData = JSON.parse(fileData);
 
-					expect(buildRequest({
+					buildRequest({
 						events: parsedData
-					})[2].hotelDetailsRate).to.eql(556.54);
+					}).then(function(result) {
+						expect(result[2].hotelDetailsRate).to.eql(556.54);
+						done();
+					});
 				});
 
-				it('sets rate difference', function() {
+				it('sets rate difference', function(done) {
 					var fileData = fs.readFileSync(__dirname + '/data/complexOrder.json');
 					var parsedData = JSON.parse(fileData);
 
-					expect(buildRequest({
+					buildRequest({
 						events: parsedData
-					})[2].rateDifference).to.eql(3.21);
+					}).then(function(result) {
+						expect(result[2].rateDifference).to.eql(3.21);
+						done();
+					});
 				});
 
-				it('sets rate difference percentage', function() {
+				it('sets rate difference percentage', function(done) {
 					var fileData = fs.readFileSync(__dirname + '/data/complexOrder.json');
 					var parsedData = JSON.parse(fileData);
 
-					expect(buildRequest({
+					buildRequest({
 						events: parsedData
-					})[2].rateDifferencePercentage).to.eql(100.58);
+					}).then(function(result) {
+						expect(result[2].rateDifferencePercentage).to.eql(100.58);
+						done();
+					});
 				});
 			});
 			
