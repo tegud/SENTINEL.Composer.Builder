@@ -194,6 +194,31 @@ describe('ratesAccuracyCheck', function() {
 			});
 		});
 
+		it('sets date from string', function(done) {
+			var moment = require('moment');
+
+			buildRequest({
+				events: [
+					{
+						"@timestamp": "2015-06-17T13:53:35.814Z",
+						"type": "lr_varnish_request",
+						"url": "/beacon/hotelDetailsAccuracy?hotelId=195042&rate=503.89&searchId=1ec79c06-dd05-4f3d-8b9a-a7a49b142e05&date=1435878000&nights=3&adults=2&children=0",
+						"@type": "lr_varnish_request",
+						"url_querystring_hotelId": "195042",
+						"url_querystring_rate": "503.89",
+						"url_querystring_searchId": "1ec79c06-dd05-4f3d-8b9a-a7a49b142e05",
+						"url_querystring_date": "2015-07-03",
+						"url_querystring_nights": "3",
+						"url_querystring_adults": "2",
+						"url_querystring_children": "0"
+					}
+				]
+			}).then(function(result) {
+				expect(result.date).to.be("2015-07-03");
+				done();
+			});
+		});
+
 		it('sets nights', function(done) {
 			buildRequest({
 				events: [
@@ -939,6 +964,61 @@ describe('ratesAccuracyCheck', function() {
 				});
 			});
 			
+		});
+
+
+		describe('vary dates', function() {
+			describe('first accuracy report', function() {
+				it('sets hotelId', function(done) {
+					var fileData = fs.readFileSync(__dirname + '/data/complexOrderTwo.json');
+					var parsedData = JSON.parse(fileData);
+
+					buildRequest({
+						events: parsedData
+					}).then(function(result) {
+						expect(result[0].hotelId).to.eql(90461);
+						done();
+					});
+				});
+			});
+
+			describe('second accuracy report', function() {
+				it('sets hotelId', function(done) {
+					var fileData = fs.readFileSync(__dirname + '/data/complexOrderTwo.json');
+					var parsedData = JSON.parse(fileData);
+
+					buildRequest({
+						events: parsedData
+					}).then(function(result) {
+						expect(result[1].hotelId).to.eql(276305);
+						done();
+					});
+				});
+			});
+
+				// it('sets search rate', function(done) {
+				// 	var fileData = fs.readFileSync(__dirname + '/data/complexOrderTwo.json');
+				// 	var parsedData = JSON.parse(fileData);
+
+				// 	buildRequest({
+				// 		events: parsedData
+				// 	}).then(function(result) {
+				// 		expect(result[2].searchRate).to.eql(559.75);
+				// 		done();
+				// 	});
+				// });
+
+				// it('sets hotel details rate', function(done) {
+				// 	var fileData = fs.readFileSync(__dirname + '/data/complexOrderTwo.json');
+				// 	var parsedData = JSON.parse(fileData);
+
+				// 	buildRequest({
+				// 		events: parsedData
+				// 	}).then(function(result) {
+				// 		expect(result[2].hotelDetailsRate).to.eql(556.54);
+				// 		done();
+				// 	});
+				// });
 		});
 	});
 });
