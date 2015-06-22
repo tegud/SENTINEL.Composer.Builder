@@ -995,30 +995,22 @@ describe('ratesAccuracyCheck', function() {
 					});
 				});
 			});
+		});
 
-				// it('sets search rate', function(done) {
-				// 	var fileData = fs.readFileSync(__dirname + '/data/complexOrderTwo.json');
-				// 	var parsedData = JSON.parse(fileData);
+		describe('complex three', function() {
+			describe('first accuracy report', function() {
+				it('sets hotelId', function(done) {
+					var fileData = fs.readFileSync(__dirname + '/data/complexOrderThree.json');
+					var parsedData = JSON.parse(fileData);
 
-				// 	buildRequest({
-				// 		events: parsedData
-				// 	}).then(function(result) {
-				// 		expect(result[2].searchRate).to.eql(559.75);
-				// 		done();
-				// 	});
-				// });
-
-				// it('sets hotel details rate', function(done) {
-				// 	var fileData = fs.readFileSync(__dirname + '/data/complexOrderTwo.json');
-				// 	var parsedData = JSON.parse(fileData);
-
-				// 	buildRequest({
-				// 		events: parsedData
-				// 	}).then(function(result) {
-				// 		expect(result[2].hotelDetailsRate).to.eql(556.54);
-				// 		done();
-				// 	});
-				// });
+					buildRequest({
+						events: parsedData
+					}).then(function(result) {
+						expect(result.hotelId).to.eql(68413);
+						done();
+					});
+				});
+			});
 		});
 	});
 });
