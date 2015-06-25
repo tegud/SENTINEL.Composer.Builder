@@ -597,7 +597,7 @@ describe('ratesAccuracyCheck', function() {
 			});
 		});
 
-		it('sets hotelDetailsRate', function(done) {
+		it('sets absoluteDifference', function(done) {
 			buildRequest({
 				events: [
 					{
@@ -636,6 +636,346 @@ describe('ratesAccuracyCheck', function() {
 			}).then(function(result) {
 				expect(result.absoluteDifference).to.be(2.88);
 				done();
+			});
+		});
+
+		describe('result', function() {
+			it('sets NOAVAILABILITY', function(done) {
+				buildRequest({
+					events: [
+						{
+							"@timestamp": "2015-06-17T13:53:35.814Z",
+							"type": "lr_varnish_request",
+							"url": "/beacon/hotelDetailsAccuracy?hotelId=195042&rate=503.89&searchId=1ec79c06-dd05-4f3d-8b9a-a7a49b142e05&date=1435878000&nights=3&adults=2&children=0",
+							"req_headers": {
+								"Referer": "http://www.laterooms.com/en/k14605275_amsterdam-hotels.aspx?k=Amsterdam&d=20150703&n=3&rt=2-0&rt-adult=2&rt-child=0"
+							},
+							"@type": "lr_varnish_request",
+							"url_querystring_hotelId": "195042",
+							"url_querystring_rate": "501.01",
+							"url_querystring_searchId": "1ec79c06-dd05-4f3d-8b9a-a7a49b142e05",
+							"url_querystring_date": "1435878000",
+							"url_querystring_nights": "3",
+							"url_querystring_adults": "2",
+							"url_querystring_children": "0"
+						},
+						{
+							"@timestamp": "2015-06-17T13:53:39.999Z",
+							"type": "lr_varnish_request",
+							"url": "/beacon/hotelDetailsAccuracy?hotelId=195042&rate=501.01&searchId=1ec79c06-dd05-4f3d-8b9a-a7a49b142e05&date=1435878000&nights=3&adults=2&children=0",
+							"req_headers": {
+								"Referer": "http://www.laterooms.com/en/hotel-reservations/195042_hotel-cc-amsterdam.aspx"
+							},
+							"@type": "lr_varnish_request",
+							"url_querystring_hotelId": "195042",
+							"url_querystring_searchId": "1ec79c06-dd05-4f3d-8b9a-a7a49b142e05",
+							"url_querystring_date": "1435878000",
+							"url_querystring_nights": "3",
+							"url_querystring_adults": "2",
+							"url_querystring_children": "0"
+						}
+					]
+				}).then(function(result) {
+					expect(result.result).to.be('NO_AVAILABILITY');
+					done();
+				});
+			});
+
+			it('sets MORE_EXPENSIVE', function(done) {
+				buildRequest({
+					events: [
+						{
+							"@timestamp": "2015-06-17T13:53:35.814Z",
+							"type": "lr_varnish_request",
+							"url": "/beacon/hotelDetailsAccuracy?hotelId=195042&rate=503.89&searchId=1ec79c06-dd05-4f3d-8b9a-a7a49b142e05&date=1435878000&nights=3&adults=2&children=0",
+							"req_headers": {
+								"Referer": "http://www.laterooms.com/en/k14605275_amsterdam-hotels.aspx?k=Amsterdam&d=20150703&n=3&rt=2-0&rt-adult=2&rt-child=0"
+							},
+							"@type": "lr_varnish_request",
+							"url_querystring_hotelId": "195042",
+							"url_querystring_rate": "501.01",
+							"url_querystring_searchId": "1ec79c06-dd05-4f3d-8b9a-a7a49b142e05",
+							"url_querystring_date": "1435878000",
+							"url_querystring_nights": "3",
+							"url_querystring_adults": "2",
+							"url_querystring_children": "0"
+						},
+						{
+							"@timestamp": "2015-06-17T13:53:39.999Z",
+							"type": "lr_varnish_request",
+							"url": "/beacon/hotelDetailsAccuracy?hotelId=195042&rate=501.01&searchId=1ec79c06-dd05-4f3d-8b9a-a7a49b142e05&date=1435878000&nights=3&adults=2&children=0",
+							"req_headers": {
+								"Referer": "http://www.laterooms.com/en/hotel-reservations/195042_hotel-cc-amsterdam.aspx"
+							},
+							"@type": "lr_varnish_request",
+							"url_querystring_rate": "601.01",
+							"url_querystring_hotelId": "195042",
+							"url_querystring_searchId": "1ec79c06-dd05-4f3d-8b9a-a7a49b142e05",
+							"url_querystring_date": "1435878000",
+							"url_querystring_nights": "3",
+							"url_querystring_adults": "2",
+							"url_querystring_children": "0"
+						}
+					]
+				}).then(function(result) {
+					expect(result.result).to.be('MORE_EXPENSIVE');
+					done();
+				});
+			});
+
+			it('sets LESS_EXPENSIVE', function(done) {
+				buildRequest({
+					events: [
+						{
+							"@timestamp": "2015-06-17T13:53:35.814Z",
+							"type": "lr_varnish_request",
+							"url": "/beacon/hotelDetailsAccuracy?hotelId=195042&rate=503.89&searchId=1ec79c06-dd05-4f3d-8b9a-a7a49b142e05&date=1435878000&nights=3&adults=2&children=0",
+							"req_headers": {
+								"Referer": "http://www.laterooms.com/en/k14605275_amsterdam-hotels.aspx?k=Amsterdam&d=20150703&n=3&rt=2-0&rt-adult=2&rt-child=0"
+							},
+							"@type": "lr_varnish_request",
+							"url_querystring_hotelId": "195042",
+							"url_querystring_rate": "501.01",
+							"url_querystring_searchId": "1ec79c06-dd05-4f3d-8b9a-a7a49b142e05",
+							"url_querystring_date": "1435878000",
+							"url_querystring_nights": "3",
+							"url_querystring_adults": "2",
+							"url_querystring_children": "0"
+						},
+						{
+							"@timestamp": "2015-06-17T13:53:39.999Z",
+							"type": "lr_varnish_request",
+							"url": "/beacon/hotelDetailsAccuracy?hotelId=195042&rate=501.01&searchId=1ec79c06-dd05-4f3d-8b9a-a7a49b142e05&date=1435878000&nights=3&adults=2&children=0",
+							"req_headers": {
+								"Referer": "http://www.laterooms.com/en/hotel-reservations/195042_hotel-cc-amsterdam.aspx"
+							},
+							"@type": "lr_varnish_request",
+							"url_querystring_rate": "401.01",
+							"url_querystring_hotelId": "195042",
+							"url_querystring_searchId": "1ec79c06-dd05-4f3d-8b9a-a7a49b142e05",
+							"url_querystring_date": "1435878000",
+							"url_querystring_nights": "3",
+							"url_querystring_adults": "2",
+							"url_querystring_children": "0"
+						}
+					]
+				}).then(function(result) {
+					expect(result.result).to.be('LESS_EXPENSIVE');
+					done();
+				});
+			});
+
+			it('sets OK for matched rate', function(done) {
+				buildRequest({
+					events: [
+						{
+							"@timestamp": "2015-06-17T13:53:35.814Z",
+							"type": "lr_varnish_request",
+							"url": "/beacon/hotelDetailsAccuracy?hotelId=195042&rate=503.89&searchId=1ec79c06-dd05-4f3d-8b9a-a7a49b142e05&date=1435878000&nights=3&adults=2&children=0",
+							"req_headers": {
+								"Referer": "http://www.laterooms.com/en/k14605275_amsterdam-hotels.aspx?k=Amsterdam&d=20150703&n=3&rt=2-0&rt-adult=2&rt-child=0"
+							},
+							"@type": "lr_varnish_request",
+							"url_querystring_hotelId": "195042",
+							"url_querystring_rate": "501.01",
+							"url_querystring_searchId": "1ec79c06-dd05-4f3d-8b9a-a7a49b142e05",
+							"url_querystring_date": "1435878000",
+							"url_querystring_nights": "3",
+							"url_querystring_adults": "2",
+							"url_querystring_children": "0"
+						},
+						{
+							"@timestamp": "2015-06-17T13:53:39.999Z",
+							"type": "lr_varnish_request",
+							"url": "/beacon/hotelDetailsAccuracy?hotelId=195042&rate=501.01&searchId=1ec79c06-dd05-4f3d-8b9a-a7a49b142e05&date=1435878000&nights=3&adults=2&children=0",
+							"req_headers": {
+								"Referer": "http://www.laterooms.com/en/hotel-reservations/195042_hotel-cc-amsterdam.aspx"
+							},
+							"@type": "lr_varnish_request",
+							"url_querystring_rate": "501.01",
+							"url_querystring_hotelId": "195042",
+							"url_querystring_searchId": "1ec79c06-dd05-4f3d-8b9a-a7a49b142e05",
+							"url_querystring_date": "1435878000",
+							"url_querystring_nights": "3",
+							"url_querystring_adults": "2",
+							"url_querystring_children": "0"
+						}
+					]
+				}).then(function(result) {
+					expect(result.result).to.be('OK');
+					done();
+				});
+			});
+
+			it('sets OK for matched missing availability', function(done) {
+				buildRequest({
+					events: [
+						{
+							"@timestamp": "2015-06-17T13:53:35.814Z",
+							"type": "lr_varnish_request",
+							"url": "/beacon/hotelDetailsAccuracy?hotelId=195042&rate=503.89&searchId=1ec79c06-dd05-4f3d-8b9a-a7a49b142e05&date=1435878000&nights=3&adults=2&children=0",
+							"req_headers": {
+								"Referer": "http://www.laterooms.com/en/k14605275_amsterdam-hotels.aspx?k=Amsterdam&d=20150703&n=3&rt=2-0&rt-adult=2&rt-child=0"
+							},
+							"@type": "lr_varnish_request",
+							"url_querystring_hotelId": "195042",
+							"url_querystring_searchId": "1ec79c06-dd05-4f3d-8b9a-a7a49b142e05",
+							"url_querystring_date": "1435878000",
+							"url_querystring_nights": "3",
+							"url_querystring_adults": "2",
+							"url_querystring_children": "0"
+						},
+						{
+							"@timestamp": "2015-06-17T13:53:39.999Z",
+							"type": "lr_varnish_request",
+							"url": "/beacon/hotelDetailsAccuracy?hotelId=195042&rate=501.01&searchId=1ec79c06-dd05-4f3d-8b9a-a7a49b142e05&date=1435878000&nights=3&adults=2&children=0",
+							"req_headers": {
+								"Referer": "http://www.laterooms.com/en/hotel-reservations/195042_hotel-cc-amsterdam.aspx"
+							},
+							"@type": "lr_varnish_request",
+							"url_querystring_hotelId": "195042",
+							"url_querystring_searchId": "1ec79c06-dd05-4f3d-8b9a-a7a49b142e05",
+							"url_querystring_date": "1435878000",
+							"url_querystring_nights": "3",
+							"url_querystring_adults": "2",
+							"url_querystring_children": "0"
+						}
+					]
+				}).then(function(result) {
+					expect(result.result).to.be('OK');
+					done();
+				});
+			});
+
+			it('sets CURRENCY_MISS for matched missing availability', function(done) {
+				buildRequest({
+					events: [
+						{
+							"@timestamp": "2015-06-17T13:53:35.814Z",
+							"type": "lr_varnish_request",
+							"url": "/beacon/hotelDetailsAccuracy?hotelId=195042&rate=503.89&searchId=1ec79c06-dd05-4f3d-8b9a-a7a49b142e05&date=1435878000&nights=3&adults=2&children=0",
+							"req_headers": {
+								"Referer": "http://www.laterooms.com/en/k14605275_amsterdam-hotels.aspx?k=Amsterdam&d=20150703&n=3&rt=2-0&rt-adult=2&rt-child=0"
+							},
+							"@type": "lr_varnish_request",
+							"url_querystring_hotelId": "195042",
+							"url_querystring_rate": "501.01",
+							"url_querystring_currency": "EUR",
+							"url_querystring_searchId": "1ec79c06-dd05-4f3d-8b9a-a7a49b142e05",
+							"url_querystring_date": "1435878000",
+							"url_querystring_nights": "3",
+							"url_querystring_adults": "2",
+							"url_querystring_children": "0"
+						},
+						{
+							"@timestamp": "2015-06-17T13:53:39.999Z",
+							"type": "lr_varnish_request",
+							"url": "/beacon/hotelDetailsAccuracy?hotelId=195042&rate=501.01&searchId=1ec79c06-dd05-4f3d-8b9a-a7a49b142e05&date=1435878000&nights=3&adults=2&children=0",
+							"req_headers": {
+								"Referer": "http://www.laterooms.com/en/hotel-reservations/195042_hotel-cc-amsterdam.aspx"
+							},
+							"@type": "lr_varnish_request",
+							"url_querystring_hotelId": "195042",
+							"url_querystring_rate": "501.01",
+							"url_querystring_currency": "GBP",
+							"url_querystring_searchId": "1ec79c06-dd05-4f3d-8b9a-a7a49b142e05",
+							"url_querystring_date": "1435878000",
+							"url_querystring_nights": "3",
+							"url_querystring_adults": "2",
+							"url_querystring_children": "0"
+						}
+					]
+				}).then(function(result) {
+					expect(result.result).to.be('CURRENCY_MISS');
+					done();
+				});
+			});
+
+			it('sets CURRENCY_MISS for matched missing availability overrides rate mismatch', function(done) {
+				buildRequest({
+					events: [
+						{
+							"@timestamp": "2015-06-17T13:53:35.814Z",
+							"type": "lr_varnish_request",
+							"url": "/beacon/hotelDetailsAccuracy?hotelId=195042&rate=503.89&searchId=1ec79c06-dd05-4f3d-8b9a-a7a49b142e05&date=1435878000&nights=3&adults=2&children=0",
+							"req_headers": {
+								"Referer": "http://www.laterooms.com/en/k14605275_amsterdam-hotels.aspx?k=Amsterdam&d=20150703&n=3&rt=2-0&rt-adult=2&rt-child=0"
+							},
+							"@type": "lr_varnish_request",
+							"url_querystring_hotelId": "195042",
+							"url_querystring_rate": "601.01",
+							"url_querystring_currency": "EUR",
+							"url_querystring_searchId": "1ec79c06-dd05-4f3d-8b9a-a7a49b142e05",
+							"url_querystring_date": "1435878000",
+							"url_querystring_nights": "3",
+							"url_querystring_adults": "2",
+							"url_querystring_children": "0"
+						},
+						{
+							"@timestamp": "2015-06-17T13:53:39.999Z",
+							"type": "lr_varnish_request",
+							"url": "/beacon/hotelDetailsAccuracy?hotelId=195042&rate=501.01&searchId=1ec79c06-dd05-4f3d-8b9a-a7a49b142e05&date=1435878000&nights=3&adults=2&children=0",
+							"req_headers": {
+								"Referer": "http://www.laterooms.com/en/hotel-reservations/195042_hotel-cc-amsterdam.aspx"
+							},
+							"@type": "lr_varnish_request",
+							"url_querystring_hotelId": "195042",
+							"url_querystring_rate": "501.01",
+							"url_querystring_currency": "GBP",
+							"url_querystring_searchId": "1ec79c06-dd05-4f3d-8b9a-a7a49b142e05",
+							"url_querystring_date": "1435878000",
+							"url_querystring_nights": "3",
+							"url_querystring_adults": "2",
+							"url_querystring_children": "0"
+						}
+					]
+				}).then(function(result) {
+					expect(result.result).to.be('CURRENCY_MISS');
+					done();
+				});
+			});
+
+			it('sets NO_AVAILABILITY for matched missing availability overrides currency mismatch', function(done) {
+				buildRequest({
+					events: [
+						{
+							"@timestamp": "2015-06-17T13:53:35.814Z",
+							"type": "lr_varnish_request",
+							"url": "/beacon/hotelDetailsAccuracy?hotelId=195042&rate=503.89&searchId=1ec79c06-dd05-4f3d-8b9a-a7a49b142e05&date=1435878000&nights=3&adults=2&children=0",
+							"req_headers": {
+								"Referer": "http://www.laterooms.com/en/k14605275_amsterdam-hotels.aspx?k=Amsterdam&d=20150703&n=3&rt=2-0&rt-adult=2&rt-child=0"
+							},
+							"@type": "lr_varnish_request",
+							"url_querystring_hotelId": "195042",
+							"url_querystring_rate": "601.01",
+							"url_querystring_currency": "EUR",
+							"url_querystring_searchId": "1ec79c06-dd05-4f3d-8b9a-a7a49b142e05",
+							"url_querystring_date": "1435878000",
+							"url_querystring_nights": "3",
+							"url_querystring_adults": "2",
+							"url_querystring_children": "0"
+						},
+						{
+							"@timestamp": "2015-06-17T13:53:39.999Z",
+							"type": "lr_varnish_request",
+							"url": "/beacon/hotelDetailsAccuracy?hotelId=195042&rate=501.01&searchId=1ec79c06-dd05-4f3d-8b9a-a7a49b142e05&date=1435878000&nights=3&adults=2&children=0",
+							"req_headers": {
+								"Referer": "http://www.laterooms.com/en/hotel-reservations/195042_hotel-cc-amsterdam.aspx"
+							},
+							"@type": "lr_varnish_request",
+							"url_querystring_hotelId": "195042",
+							"url_querystring_currency": "GBP",
+							"url_querystring_searchId": "1ec79c06-dd05-4f3d-8b9a-a7a49b142e05",
+							"url_querystring_date": "1435878000",
+							"url_querystring_nights": "3",
+							"url_querystring_adults": "2",
+							"url_querystring_children": "0"
+						}
+					]
+				}).then(function(result) {
+					expect(result.result).to.be('NO_AVAILABILITY');
+					done();
+				});
 			});
 		});
 
