@@ -31,6 +31,16 @@ describe('buildRatesAccuracySummary', function() {
 		}).outcomes).to.be('OK OK NO_AVAILABILITY');
 	});
 
+	it('sets the lastOutcome', function() {
+		expect(buildSummary({ 
+			events: [
+				{ type: 'rates_accuracy_result', result: 'OK' },
+				{ type: 'rates_accuracy_result', result: 'OK' },
+				{ type: 'rates_accuracy_result', result: 'NO_AVAILABILITY' }
+			]
+		}).lastOutcome).to.be('NO_AVAILABILITY');
+	});
+
 	it('sets the failures', function() {
 		expect(buildSummary({ 
 			events: [
