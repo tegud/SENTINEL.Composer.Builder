@@ -39,7 +39,7 @@ describe('buildSession', function() {
 
 	it('sets sessionId', function() {
 		expect(buildRequests({
-			sessionId: "543534gdfgdfgd",
+			key: "543534gdfgdfgd",
 			events: [
 				{  }
 			]

@@ -113,6 +113,22 @@ describe('Composer.Builder', function() {
 		});
 
 		describe('creates new session object', function() {
+			it('sets key', function(done) {
+				populateRedisAndSetExpiredKeyMessage('session', '104e9439-63de-4373-95ff-6dfa365e4951', 'three.json');
+
+				udpClient.on("message", function messageReceived(msg) {
+					var data = msg.toString('utf-8');
+					var parsedData = JSON.parse(data);
+
+					if(parsedData.type !== 'session') {
+						return;
+					}
+
+					expect(parsedData.sessionId).to.be('104e9439-63de-4373-95ff-6dfa365e4951');
+					done();
+				});
+			});	
+
 			describe('sets requests', function() {
 				it('total', function(done) {
 					populateRedisAndSetExpiredKeyMessage('session', '104e9439-63de-4373-95ff-6dfa365e4951', 'three.json');
