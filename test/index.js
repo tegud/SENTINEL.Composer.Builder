@@ -11,7 +11,7 @@ var Server = proxyquire('../lib/server', {
 			'redis': fakeRedis
 		})
 	})
-});
+}); 
 var _ = require('lodash');
 var moment = require('moment');
 
@@ -87,7 +87,9 @@ describe('Composer.Builder', function() {
 
 	describe('event is inputted via udp', function() {
 		beforeEach(function(done) {
-			server = new Server({
+			server = new Server();
+
+			server.loadConfig({
 				stores: {
 					'redis': {
 						type: 'redis',
@@ -101,9 +103,7 @@ describe('Composer.Builder', function() {
 				publishers: [
 					{ type: 'udp', host: '127.0.0.1', port: 1235 }
 				]
-			});
-
-			server.start().then(done);
+			}).then(server.start).then(done);
 
 			udpClient = dgram.createSocket("udp4");
 
@@ -451,9 +451,9 @@ describe('Composer.Builder', function() {
 		beforeEach(function(done) {
 			server = new Server();
 
-			server.loadConfigFromFile(__dirname + '/config/test.json');
-
-			server.start().then(done);
+			server.loadConfigFromFile(__dirname + '/config/test.json')
+				.then(server.start)
+				.then(done);
 
 			udpClient = dgram.createSocket("udp4");
 
