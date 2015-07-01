@@ -12,11 +12,12 @@ var moment = require('moment');
 var loggedItems = [];
 
 function FakeLogger() {
-	return function (level, module, message) {
+	return function (level, module, message, data) {
 		loggedItems.push({
 			level: level,
 			module: module, 
-			message: message
+			message: message,
+			data: data
 		});
 	}
 }
@@ -129,6 +130,16 @@ describe('Logging', function() {
 			logging.log('DEBUG', undefined, 'TEST MESSAGE');
 
 			expect(loggedItems[0].message).to.be('TEST MESSAGE');
+		});
+	});
+
+	describe('log sets data', function() {
+		it('modifies the specified logger\'s level', function() {
+			logging.registerLogger({ level: 'INFO', type: 'console', name: 'default' });
+
+			logging.log('INFO', undefined, 'TEST MESSAGE', { a: 1 });
+
+			expect(loggedItems[0].data).to.eql({ a: 1 });
 		});
 	});
 });
