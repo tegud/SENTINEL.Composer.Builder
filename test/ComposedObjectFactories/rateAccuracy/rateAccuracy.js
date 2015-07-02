@@ -134,7 +134,7 @@ describe('ratesAccuracyCheck', function() {
 							"url_querystring_rate": "503.89",
 							"url_querystring_session": "80331b1d-b7bb-41bc-bf7e-c3ca917a1449",
 							"url_querystring_searchId": "1ec79c06-dd05-4f3d-8b9a-a7a49b142e05",
-							"url_querystring_date": "1435878000",
+							"url_querystring_date": "2015-07-03",
 							"url_querystring_nights": "3",
 							"url_querystring_adults": "2",
 							"url_querystring_children": "0"
