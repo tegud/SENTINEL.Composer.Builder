@@ -47,7 +47,7 @@ describe('Logstash Logger', function() {
 				output: {
 					transport: 'tcp',
 					host: '127.0.0.1',
-					port: 9990
+					port: 9991
 				},
 				format: 'logstash',
 				type: 'test_type'
@@ -69,7 +69,7 @@ describe('Logstash Logger', function() {
 				});
 			});
 
-			server.listen(9990, '127.0.0.1');
+			server.listen(9991, '127.0.0.1');
 
 			logger('INFO', undefined, 'TEST MESSAGE');
 		});
