@@ -1,5 +1,8 @@
 var expect = require('expect.js');
 var proxyquire = require('proxyquire');
+var dgram = require('dgram');
+var Promise = require('bluebird');
+var fs = require('fs');
 var logging = proxyquire('../../lib/logging', {
 	'./console': FakeLogger
 }); 
