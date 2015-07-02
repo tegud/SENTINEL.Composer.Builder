@@ -41,7 +41,7 @@ describe('Logstash Logger', function() {
 		});
 	});
 
-	describe('logs to tcp', function() {
+	describe.skip('logs to tcp', function() {
 		it('formatted event is sent', function(done) {
 			var logger = new logstashLogger({
 				output: {
