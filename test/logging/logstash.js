@@ -73,7 +73,7 @@ describe('Logstash Logger', function() {
 
 			setTimeout(function() {
 				logger('INFO', undefined, 'TEST MESSAGE');
-			}, 100)
+			}, 1000)
 		});
 	});
 
