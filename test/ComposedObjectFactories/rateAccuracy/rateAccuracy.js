@@ -142,7 +142,13 @@ describe('ratesAccuracyCheck', function() {
 					]
 				}).then(function(result) {
 					expect(loggedItems[0].data).to.eql({
-						sessionId: '80331b1d-b7bb-41bc-bf7e-c3ca917a1449'
+						sessionId: '80331b1d-b7bb-41bc-bf7e-c3ca917a1449',
+						searchId: '1ec79c06-dd05-4f3d-8b9a-a7a49b142e05',
+						hotelId: 195042,
+						searchDate: "2015-07-03",
+						nights: 3,
+						adults: 2,
+						children: 0
 					});
 					done();
 				});
@@ -318,31 +324,6 @@ describe('ratesAccuracyCheck', function() {
 				]
 			}).then(function(result) {
 				expect(result.sessionId).to.be("80331b1d-b7bb-41bc-bf7e-c3ca917a1449");
-				done();
-			});
-		});
-
-		it.skip('sets date', function(done) {
-			var moment = require('moment');
-
-			buildRequest({
-				events: [
-					{
-						"@timestamp": "2015-06-17T13:53:35.814Z",
-						"type": "lr_varnish_request",
-						"url": "/beacon/hotelDetailsAccuracy?hotelId=195042&rate=503.89&searchId=1ec79c06-dd05-4f3d-8b9a-a7a49b142e05&date=1435878000&nights=3&adults=2&children=0",
-						"@type": "lr_varnish_request",
-						"url_querystring_hotelId": "195042",
-						"url_querystring_rate": "503.89",
-						"url_querystring_searchId": "1ec79c06-dd05-4f3d-8b9a-a7a49b142e05",
-						"url_querystring_date": "1435878000",
-						"url_querystring_nights": "3",
-						"url_querystring_adults": "2",
-						"url_querystring_children": "0"
-					}
-				]
-			}).then(function(result) {
-				expect(result.date).to.be("2015-07-03");
 				done();
 			});
 		});
