@@ -69,6 +69,10 @@ describe('Logstash Logger', function() {
 				});
 			});
 
+			server.on('error', function (e) {
+				console.log('ERROR!!! ' + e.code);
+			});
+
 			server.listen(9991, '127.0.0.1', function() {
 				console.log('listenning...');
 			});
