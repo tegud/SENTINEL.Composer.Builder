@@ -1,145 +1,184 @@
 var expect = require('expect.js');
 var proxyquire = require('proxyquire');
 var dgram = require('dgram');
-var Promise = require('bluebird');
-var fs = require('fs');
-var logging = proxyquire('../../lib/logging', {
-	'./console': FakeLogger
-}); 
+var net = require('net');
+var logstashLogger = require('../../lib/logging/logstash'); 
 var _ = require('lodash');
 var moment = require('moment');
 
-var loggedItems = [];
+describe('Logstash Logger', function() {
+	describe('logs to udp', function() {
+		it('formatted event is sent', function(done) {
+			var logger = new logstashLogger({
+				output: {
+					transport: 'udp',
+					host: '127.0.0.1',
+					port: 9990
+				},
+				format: 'logstash',
+				type: 'test_type'
+			});
 
-function FakeLogger() {
-	return function (level, module, message, data) {
-		loggedItems.push({
-			level: level,
-			module: module, 
-			message: message,
-			data: data
-		});
-	}
-}
+			var udpClient = dgram.createSocket("udp4");
 
-describe('Logging', function() {
-	beforeEach(function() {
-		loggedItems = [];
-		logging.removeAll();
-	});
+			udpClient.bind(9990);
 
-	describe('externally defined logging module', function() {
-		it('matching log level is logged', function() {
-			logging.registerLogger({ level: 'INFO' }, FakeLogger);
+			udpClient.on("message", function messageReceived(msg) {
+				var data = msg.toString('utf-8');
+				var parsedData = JSON.parse(data);
 
-			logging.log('INFO', undefined, 'TEST MESSAGE');
+				expect(parsedData).to.eql({
+					type: 'test_type',
+					message: 'TEST MESSAGE'
+				});
 
-			expect(loggedItems[0].message).to.be('TEST MESSAGE');
-		});
+				udpClient.close();
 
-		it('lower log level is not logged', function() {
-			logging.registerLogger({ level: 'INFO' }, FakeLogger);
+				done();
+			});
 
-			logging.log('DEBUG', undefined, 'TEST MESSAGE');
-
-			expect(loggedItems.length).to.be(0);
-		});
-
-		it('higher log level is logged', function() {
-			logging.registerLogger({ level: 'INFO' }, FakeLogger);
-
-			logging.log('ERROR', undefined, 'TEST MESSAGE');
-
-			expect(loggedItems[0].message).to.be('TEST MESSAGE');
-		});
-
-		it('logs info', function() {
-			logging.registerLogger({ level: 'INFO', type: 'console' });
-
-			logging.logInfo('TEST MESSAGE');
-
-			expect(loggedItems[0].level).to.be('INFO');
-		});
-
-		it('logs debug', function() {
-			logging.registerLogger({ level: 'DEBUG', type: 'console' });
-
-			logging.logDebug('TEST MESSAGE');
-
-			expect(loggedItems[0].level).to.be('DEBUG');
-		});
-
-		it('logs error', function() {
-			logging.registerLogger({ level: 'ERROR', type: 'console' });
-
-			logging.logError('TEST MESSAGE');
-
-			expect(loggedItems[0].level).to.be('ERROR');
+			logger('INFO', undefined, 'TEST MESSAGE');
 		});
 	});
 
-	describe('built in logging module', function() {
-		it('matching log level is logged', function() {
-			logging.registerLogger({ level: 'INFO', type: 'console' });
+	describe('logs to tcp', function() {
+		it('formatted event is sent', function(done) {
+			var logger = new logstashLogger({
+				output: {
+					transport: 'tcp',
+					host: '127.0.0.1',
+					port: 9990
+				},
+				format: 'logstash',
+				type: 'test_type'
+			});
 
-			logging.log('INFO', undefined, 'TEST MESSAGE');
+			var server = net.createServer(function(socket) {
+				socket.on('data', function (msg) {
+					var data = msg.toString('utf-8');
+					var parsedData = JSON.parse(data);
 
-			expect(loggedItems[0].message).to.be('TEST MESSAGE');
+					expect(parsedData).to.eql({
+						type: 'test_type',
+						message: 'TEST MESSAGE'
+					});
+
+					server.close();
+
+					done();
+				});
+			});
+
+			server.listen(9990, '127.0.0.1');
+
+			logger('INFO', undefined, 'TEST MESSAGE');
 		});
 	});
 
-	describe('forModule', function() {
-		it('sets module name', function() {
-			logging.registerLogger({ level: 'INFO', type: 'console' });
+	describe('type can be fined by level', function() {
+		it('type prefix is prepended to lower case level', function(done) {
+			var logger = new logstashLogger({
+				output: {
+					transport: 'udp',
+					host: '127.0.0.1',
+					port: 9990
+				},
+				format: 'logstash',
+				type: { 
+					prefix: 'test_type_' 
+				}
+			});
 
-			logging.forModule('TEST MODULE').logInfo('TEST MESSAGE');
+			var udpClient = dgram.createSocket("udp4");
 
-			expect(loggedItems[0].module).to.be('TEST MODULE');
+			udpClient.bind(9990);
+
+			udpClient.on("message", function messageReceived(msg) {
+				var data = msg.toString('utf-8');
+				var parsedData = JSON.parse(data);
+
+				expect(parsedData).to.eql({
+					type: 'test_type_info',
+					message: 'TEST MESSAGE'
+				});
+
+				udpClient.close();
+
+				done();
+			});
+
+			logger('INFO', undefined, 'TEST MESSAGE');
 		});
 
-		it('logs info', function() {
-			logging.registerLogger({ level: 'INFO', type: 'console' });
+		it('sets level', function(done) {
+			var logger = new logstashLogger({
+				output: {
+					transport: 'udp',
+					host: '127.0.0.1',
+					port: 9990
+				},
+				format: 'logstash',
+				type: { 
+					prefix: 'test_type_' 
+				}
+			});
 
-			logging.forModule('TEST MODULE').logInfo('TEST MESSAGE');
+			var udpClient = dgram.createSocket("udp4");
 
-			expect(loggedItems[0].level).to.be('INFO');
+			udpClient.bind(9990);
+
+			udpClient.on("message", function messageReceived(msg) {
+				var data = msg.toString('utf-8');
+				var parsedData = JSON.parse(data);
+
+				expect(parsedData).to.eql({
+					type: 'test_type_error',
+					message: 'TEST MESSAGE'
+				});
+
+				udpClient.close();
+
+				done();
+			});
+
+			logger('ERROR', undefined, 'TEST MESSAGE');
 		});
 
-		it('logs debug', function() {
-			logging.registerLogger({ level: 'DEBUG', type: 'console' });
+		it('sets level specific override', function(done) {
+			var logger = new logstashLogger({
+				output: {
+					transport: 'udp',
+					host: '127.0.0.1',
+					port: 9990
+				},
+				format: 'logstash',
+				type: { 
+					prefix: 'test_type_',
+					overrides: {
+						'error': 'errors'
+					}
+				}
+			});
 
-			logging.forModule('TEST MODULE').logDebug('TEST MESSAGE');
+			var udpClient = dgram.createSocket("udp4");
 
-			expect(loggedItems[0].level).to.be('DEBUG');
-		});
+			udpClient.bind(9990);
 
-		it('logs error', function() {
-			logging.registerLogger({ level: 'ERROR', type: 'console' });
+			udpClient.on("message", function messageReceived(msg) {
+				var data = msg.toString('utf-8');
+				var parsedData = JSON.parse(data);
 
-			logging.forModule('TEST MODULE').logError('TEST MESSAGE');
+				expect(parsedData).to.eql({
+					type: 'test_type_errors',
+					message: 'TEST MESSAGE'
+				});
 
-			expect(loggedItems[0].level).to.be('ERROR');
-		});
-	});
+				udpClient.close();
 
-	describe('setLoggerLevel', function() {
-		it('modifies the specified logger\'s level', function() {
-			logging.registerLogger({ level: 'INFO', type: 'console', name: 'default' });
-			logging.setLoggerLevel('default', 'DEBUG');
+				done();
+			});
 
-			logging.log('DEBUG', undefined, 'TEST MESSAGE');
-
-			expect(loggedItems[0].message).to.be('TEST MESSAGE');
-		});
-	});
-
-	describe('log sets data', function() {
-		it('modifies the specified logger\'s level', function() {
-			logging.registerLogger({ level: 'INFO', type: 'console', name: 'default' });
-
-			logging.log('INFO', undefined, 'TEST MESSAGE', { a: 1 });
-
-			expect(loggedItems[0].data).to.eql({ a: 1 });
+			logger('ERROR', undefined, 'TEST MESSAGE');
 		});
 	});
 });
