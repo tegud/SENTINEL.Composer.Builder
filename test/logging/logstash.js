@@ -55,6 +55,7 @@ describe('Logstash Logger', function() {
 
 			var server = net.createServer(function(socket) {
 				socket.on('data', function (msg) {
+					console.log('DATA REC');
 					var data = msg.toString('utf-8');
 					var parsedData = JSON.parse(data);
 
