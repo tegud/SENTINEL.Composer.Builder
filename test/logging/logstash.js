@@ -76,6 +76,18 @@ describe('Logstash Logger', function() {
 	});
 
 	describe('type can be fined by level', function() {
+		var udpClient;
+
+		beforeEach(function() {
+			udpClient = dgram.createSocket("udp4");
+
+			udpClient.bind(9990);
+		});
+
+		afterEach(function() {
+			udpClient.close();
+		});
+
 		it('type prefix is prepended to lower case level', function(done) {
 			var logger = new logstashLogger({
 				output: {
@@ -89,10 +101,6 @@ describe('Logstash Logger', function() {
 				}
 			});
 
-			var udpClient = dgram.createSocket("udp4");
-
-			udpClient.bind(9990);
-
 			udpClient.on("message", function messageReceived(msg) {
 				var data = msg.toString('utf-8');
 				var parsedData = JSON.parse(data);
@@ -102,7 +110,6 @@ describe('Logstash Logger', function() {
 					message: 'TEST MESSAGE'
 				});
 
-				udpClient.close();
 
 				done();
 			});
@@ -123,10 +130,6 @@ describe('Logstash Logger', function() {
 				}
 			});
 
-			var udpClient = dgram.createSocket("udp4");
-
-			udpClient.bind(9990);
-
 			udpClient.on("message", function messageReceived(msg) {
 				var data = msg.toString('utf-8');
 				var parsedData = JSON.parse(data);
@@ -135,8 +138,6 @@ describe('Logstash Logger', function() {
 					type: 'test_type_error',
 					message: 'TEST MESSAGE'
 				});
-
-				udpClient.close();
 
 				done();
 			});
@@ -160,10 +161,6 @@ describe('Logstash Logger', function() {
 				}
 			});
 
-			var udpClient = dgram.createSocket("udp4");
-
-			udpClient.bind(9990);
-
 			udpClient.on("message", function messageReceived(msg) {
 				var data = msg.toString('utf-8');
 				var parsedData = JSON.parse(data);
@@ -172,8 +169,6 @@ describe('Logstash Logger', function() {
 					type: 'test_type_errors',
 					message: 'TEST MESSAGE'
 				});
-
-				udpClient.close();
 
 				done();
 			});
