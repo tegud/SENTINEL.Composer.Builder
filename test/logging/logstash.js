@@ -69,9 +69,12 @@ describe('Logstash Logger', function() {
 				});
 			});
 
-			server.listen(9991, '127.0.0.1');
+			server.listen(9991, '127.0.0.1', function() {
+				console.log('listenning...');
+			});
 
 			setTimeout(function() {
+				console.log('Sending...');
 				logger('INFO', undefined, 'TEST MESSAGE');
 			}, 1000)
 		});
