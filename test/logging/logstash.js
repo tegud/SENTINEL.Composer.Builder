@@ -36,7 +36,7 @@ describe('Logstash Logger', function() {
 				var parsedData = JSON.parse(data);
 
 				expect(parsedData).to.eql({
-					eventType: 'test_type',
+					type: 'test_type',
 					message: 'TEST MESSAGE'
 				});
 
@@ -69,7 +69,7 @@ describe('Logstash Logger', function() {
 					var parsedData = JSON.parse(data);
 
 					expect(parsedData).to.eql({
-						eventType: 'test_type',
+						type: 'test_type',
 						message: 'TEST MESSAGE'
 					});
 
@@ -124,7 +124,7 @@ describe('Logstash Logger', function() {
 				var parsedData = JSON.parse(data);
 
 				expect(parsedData).to.eql({
-					eventType: 'test_type_info',
+					type: 'test_type_info',
 					message: 'TEST MESSAGE'
 				});
 
@@ -152,7 +152,7 @@ describe('Logstash Logger', function() {
 				var parsedData = JSON.parse(data);
 
 				expect(parsedData).to.eql({
-					eventType: 'test_type_error',
+					type: 'test_type_error',
 					message: 'TEST MESSAGE'
 				});
 
@@ -182,7 +182,7 @@ describe('Logstash Logger', function() {
 				var parsedData = JSON.parse(data);
 
 				expect(parsedData).to.eql({
-					eventType: 'test_type_errors',
+					type: 'test_type_errors',
 					message: 'TEST MESSAGE'
 				});
 
