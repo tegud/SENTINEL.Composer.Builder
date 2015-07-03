@@ -24,7 +24,7 @@ describe('Logstash Logger', function() {
 					host: '127.0.0.1',
 					port: 9990
 				},
-				type: 'test_type'
+				eventType: 'test_type'
 			});
 
 			var udpClient = dgram.createSocket("udp4");
@@ -36,7 +36,7 @@ describe('Logstash Logger', function() {
 				var parsedData = JSON.parse(data);
 
 				expect(parsedData).to.eql({
-					type: 'test_type',
+					eventType: 'test_type',
 					message: 'TEST MESSAGE'
 				});
 
@@ -57,7 +57,7 @@ describe('Logstash Logger', function() {
 					host: '127.0.0.1',
 					port: 9991
 				},
-				type: 'test_type'
+				eventType: 'test_type'
 			});
 
 			var server = net.createServer(function(socket) {
@@ -69,7 +69,7 @@ describe('Logstash Logger', function() {
 					var parsedData = JSON.parse(data);
 
 					expect(parsedData).to.eql({
-						type: 'test_type',
+						eventType: 'test_type',
 						message: 'TEST MESSAGE'
 					});
 
@@ -114,7 +114,7 @@ describe('Logstash Logger', function() {
 					host: '127.0.0.1',
 					port: 9990
 				},
-				type: { 
+				eventType: { 
 					prefix: 'test_type_' 
 				}
 			});
@@ -124,7 +124,7 @@ describe('Logstash Logger', function() {
 				var parsedData = JSON.parse(data);
 
 				expect(parsedData).to.eql({
-					type: 'test_type_info',
+					eventType: 'test_type_info',
 					message: 'TEST MESSAGE'
 				});
 
@@ -142,7 +142,7 @@ describe('Logstash Logger', function() {
 					host: '127.0.0.1',
 					port: 9990
 				},
-				type: { 
+				eventType: { 
 					prefix: 'test_type_' 
 				}
 			});
@@ -152,7 +152,7 @@ describe('Logstash Logger', function() {
 				var parsedData = JSON.parse(data);
 
 				expect(parsedData).to.eql({
-					type: 'test_type_error',
+					eventType: 'test_type_error',
 					message: 'TEST MESSAGE'
 				});
 
@@ -169,7 +169,7 @@ describe('Logstash Logger', function() {
 					host: '127.0.0.1',
 					port: 9990
 				},
-				type: { 
+				eventType: { 
 					prefix: 'test_type_',
 					overrides: {
 						'error': 'errors'
@@ -182,7 +182,7 @@ describe('Logstash Logger', function() {
 				var parsedData = JSON.parse(data);
 
 				expect(parsedData).to.eql({
-					type: 'test_type_errors',
+					eventType: 'test_type_errors',
 					message: 'TEST MESSAGE'
 				});
 
@@ -208,7 +208,7 @@ describe('Logstash Logger', function() {
 					host: '127.0.0.1',
 					port: 9990
 				},
-				type: 'test_type'
+				eventType: 'test_type'
 			});
 
 			formattedDateTime = '';
@@ -314,7 +314,7 @@ describe('Logstash Logger', function() {
 					port: 9990
 				},
 				codec: 'oldlogstashjson',
-				type: 'test_type'
+				eventType: 'test_type'
 			});
 
 			formattedDateTime = '';
