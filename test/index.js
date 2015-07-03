@@ -479,3 +479,50 @@ describe('Composer.Builder', function() {
 		});	
 	});
 });
+
+describe('loggers can be fined through configuration', function() {
+	it('registers configured loggers', function(done) {
+		var registeredConfig;
+
+		var Server = proxyquire('../lib/server', {
+			'./config': proxyquire('../lib/config', {
+				'../stores/redis': proxyquire('../lib/stores/redis', {
+					'redis': fakeRedis
+				}),
+				'../logging': {
+					registerLogger: function(config) {
+						registeredConfig = config;
+					},
+					forModule: function() { return { logInfo: function() {} } }
+				}
+			})
+		}); 
+
+		var server = new Server();
+
+		server.loadConfig({
+			stores: {
+				'redis': {
+					type: 'redis',
+					host: '192.168.50.7',
+					port: 6379
+				}
+			},
+			listeners: [
+				{ type: 'udp', port: 1234 }
+			],
+			publishers: [
+				{ type: 'udp', host: '127.0.0.1', port: 1235 }
+			],
+			loggers: [
+				{ type: 'logstash', level: 'INFO' }
+			]
+		}).then(server.start).then(function() {
+			expect(registeredConfig).to.eql({
+				type: 'logstash', level: 'INFO'
+			});
+
+			done();
+		});
+	});
+});
