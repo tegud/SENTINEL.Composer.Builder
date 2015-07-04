@@ -94,7 +94,7 @@ describe('Logstash Logger', function() {
 		});
 	});
 
-	describe('type can be fined by level', function() {
+	describe('type can be defined by level', function() {
 		var udpClient;
 
 		beforeEach(function() {
@@ -251,6 +251,14 @@ describe('Logstash Logger', function() {
 			}));
 
 			logger('ERROR', undefined, 'TEST MESSAGE');
+		});
+
+		it('sets module', function(done) {
+			udpClient.on("message", handleMessage.bind(undefined, done, function(parsedData) {	
+				expect(parsedData.module).to.eql('TEST MODULE');
+			}));
+
+			logger('ERROR', 'TEST MODULE', 'TEST MESSAGE');
 		});
 
 		it('sets additionalProperties', function(done) {
