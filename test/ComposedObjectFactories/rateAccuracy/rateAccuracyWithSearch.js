@@ -115,6 +115,34 @@ describe('ratesAccuracyCheck with search', function() {
 		});
 	});
 
+	it('with no page number sets pageNumber to first', function(done) {
+		var fileData = fs.readFileSync(__dirname + '/data/rateAccuracyWithLinkedSearch.json');
+		var parsedData = JSON.parse(fileData);
+
+		parsedData[1].url_page = '/k16295577_loch-lomond-hotels.aspx';
+
+		buildRequest({
+			events: parsedData
+		}).then(function(result) {
+			expect(result[0].search.pageNumber).to.eql(1);
+			done();
+		});
+	});
+
+	it('with page number sets pageNumber', function(done) {
+		var fileData = fs.readFileSync(__dirname + '/data/rateAccuracyWithLinkedSearch.json');
+		var parsedData = JSON.parse(fileData);
+
+		parsedData[1].url_page = '/k16295577_loch-lomond-hotels-p2.aspx';
+
+		buildRequest({
+			events: parsedData
+		}).then(function(result) {
+			expect(result[0].search.pageNumber).to.eql(2);
+			done();
+		});
+	});
+
 	describe('quick search keyword search', function() {
 		it('sets keyword', function(done) {
 			var fileData = fs.readFileSync(__dirname + '/data/rateAccuracyWithLinkedSearch.json');
@@ -168,6 +196,34 @@ describe('ratesAccuracyCheck with search', function() {
 				events: parsedData
 			}).then(function(result) {
 				expect(result[0].search.isQuickSearch).to.eql(true);
+				done();
+			});
+		});
+
+		it('with no page number sets pageNumber to first', function(done) {
+			var fileData = fs.readFileSync(__dirname + '/data/rateAccuracyWithLinkedSearch.json');
+			var parsedData = JSON.parse(fileData);
+
+			parsedData[1].url_page = '/ks16295577_luxury-hotels_loch-lomond.aspx';
+
+			buildRequest({
+				events: parsedData
+			}).then(function(result) {
+				expect(result[0].search.pageNumber).to.eql(1);
+				done();
+			});
+		});
+
+		it('with page number sets pageNumber', function(done) {
+			var fileData = fs.readFileSync(__dirname + '/data/rateAccuracyWithLinkedSearch.json');
+			var parsedData = JSON.parse(fileData);
+
+			parsedData[1].url_page = '/ks16295577_luxury-hotels_loch-lomond-p2.aspx';
+
+			buildRequest({
+				events: parsedData
+			}).then(function(result) {
+				expect(result[0].search.pageNumber).to.eql(2);
 				done();
 			});
 		});
@@ -229,6 +285,34 @@ describe('ratesAccuracyCheck with search', function() {
 		});
 	});
 
+	it('with no page number sets pageNumber to first', function(done) {
+		var fileData = fs.readFileSync(__dirname + '/data/rateAccuracyWithLinkedSearch.json');
+		var parsedData = JSON.parse(fileData);
+
+		parsedData[1].url_page = '/r11550_hotels-in-new zealand.aspx';
+
+		buildRequest({
+			events: parsedData
+		}).then(function(result) {
+			expect(result[0].search.pageNumber).to.eql(1);
+			done();
+		});
+	});
+
+	it('with page number sets pageNumber', function(done) {
+		var fileData = fs.readFileSync(__dirname + '/data/rateAccuracyWithLinkedSearch.json');
+		var parsedData = JSON.parse(fileData);
+
+		parsedData[1].url_page = '/r246_hotels-in-lake-district-p2.aspx';
+
+		buildRequest({
+			events: parsedData
+		}).then(function(result) {
+			expect(result[0].search.pageNumber).to.eql(2);
+			done();
+		});
+	});
+
 	describe('quick search region search', function() {
 		it('sets region', function(done) {
 			var fileData = fs.readFileSync(__dirname + '/data/rateAccuracyWithLinkedSearch.json');
@@ -282,6 +366,34 @@ describe('ratesAccuracyCheck with search', function() {
 				events: parsedData
 			}).then(function(result) {
 				expect(result[0].search.isQuickSearch).to.eql(true);
+				done();
+			});
+		});
+
+		it('with no page number sets pageNumber to first', function(done) {
+			var fileData = fs.readFileSync(__dirname + '/data/rateAccuracyWithLinkedSearch.json');
+			var parsedData = JSON.parse(fileData);
+
+			parsedData[1].url_page = '/rs100_guest-houses-bed-and-breakfasts_uk.aspx';
+
+			buildRequest({
+				events: parsedData
+			}).then(function(result) {
+				expect(result[0].search.pageNumber).to.eql(1);
+				done();
+			});
+		});
+
+		it('with page number sets pageNumber', function(done) {
+			var fileData = fs.readFileSync(__dirname + '/data/rateAccuracyWithLinkedSearch.json');
+			var parsedData = JSON.parse(fileData);
+
+			parsedData[1].url_page = '/rs100_guest-houses-bed-and-breakfasts_uk-p2.aspx';
+
+			buildRequest({
+				events: parsedData
+			}).then(function(result) {
+				expect(result[0].search.pageNumber).to.eql(2);
 				done();
 			});
 		});
