@@ -65,6 +65,24 @@ describe('ratesAccuracyCheck', function() {
 		});
 	});
 
+	describe('invalid search url', function() {
+		it('does not emit accuracy check.', function(done) {
+			buildRequest({
+				events: [
+					{
+						"@timestamp": "2015-06-17T13:53:35.814Z",
+						"type": "lr_varnish_request",
+						"url": "/en/k16295585_london-hotels.aspx10-p9-p9-p5-p8-p4-p9-p4.aspx",
+						"@type": "lr_varnish_request"
+					}
+				]
+			}).then(function(result) {
+				expect(result).to.eql({});
+				done();
+			});
+		});
+	});
+
 	describe('no hotel details', function() {
 		it('sets hotelDetailsPresent to false when no hotel details request.', function(done) {
 			buildRequest({
