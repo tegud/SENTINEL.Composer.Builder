@@ -119,7 +119,7 @@ describe('ratesAccuracyCheck', function() {
 				});
 			});
 			
-			it('sets message.', function(done) {
+			it('sets data', function(done) {
 				buildRequest({
 					events: [
 						{
@@ -148,7 +148,8 @@ describe('ratesAccuracyCheck', function() {
 						searchDate: "2015-07-03",
 						nights: 3,
 						adults: 2,
-						children: 0
+						children: 0,
+						url: '/beacon/hotelDetailsAccuracy?hotelId=195042&rate=503.89&searchId=1ec79c06-dd05-4f3d-8b9a-a7a49b142e05&date=1435878000&nights=3&adults=2&children=0'
 					});
 					done();
 				});
