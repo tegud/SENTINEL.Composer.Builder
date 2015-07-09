@@ -2,7 +2,13 @@ var expect = require('expect.js');
 var fs = require('fs');
 var proxyquire = require('proxyquire');
 var Promise = require('bluebird');
+var moment = require('moment');
 var buildRequest = proxyquire('../../../lib/ComposedObjectFactories/ratesAccuracy', {
+	'./accuracyReport': proxyquire('../../../lib/ComposedObjectFactories/ratesAccuracy/accuracyReport', {
+		'moment': function(dateString, format) {
+			return moment(dateString || currentDateString, format);
+		}
+	}),
 	'./hotelData': proxyquire('../../../lib/ComposedObjectFactories/ratesAccuracy/hotelData', {
 		'../../config': {
 			lookupStore: function() {
@@ -22,6 +28,7 @@ var buildRequest = proxyquire('../../../lib/ComposedObjectFactories/ratesAccurac
 
 var fakeRedisData = {};
 var loggedItems;
+var currentDateString;
 
 describe('ratesAccuracyCheck', function() {
 	before(function() {
@@ -40,6 +47,7 @@ describe('ratesAccuracyCheck', function() {
 	beforeEach(function() {
 		fakeRedisData = {};
 		loggedItems = [];
+		currentDateString = '';
 	});
 
 	it('sets type to "cross_application_request".', function(done) {
@@ -348,8 +356,6 @@ describe('ratesAccuracyCheck', function() {
 		});
 
 		it('sets date from string', function(done) {
-			var moment = require('moment');
-
 			buildRequest({
 				events: [
 					{
@@ -368,6 +374,50 @@ describe('ratesAccuracyCheck', function() {
 				]
 			}).then(function(result) {
 				expect(result.date).to.be("2015-07-03");
+				done();
+			});
+		});
+
+		it('sets daysInFuture', function(done) {
+			currentDateString = '2015-07-01';
+
+			buildRequest({
+				events: [
+					{
+						"@timestamp": "2015-06-17T13:53:35.814Z",
+						"type": "lr_varnish_request",
+						"url": "/beacon/hotelDetailsAccuracy?hotelId=195042&rate=503.89&searchId=1ec79c06-dd05-4f3d-8b9a-a7a49b142e05&date=1435878000&nights=3&adults=2&children=0",
+						"req_headers": {
+							"Referer": "http://www.laterooms.com/en/k14605275_amsterdam-hotels.aspx?k=Amsterdam&d=20150703&n=3&rt=2-0&rt-adult=2&rt-child=0"
+						},
+						"@type": "lr_varnish_request",
+						"url_querystring_hotelId": "195042",
+						"url_querystring_rate": "503.89",
+						"url_querystring_searchId": "1ec79c06-dd05-4f3d-8b9a-a7a49b142e05",
+						"url_querystring_date": "2015-07-03",
+						"url_querystring_nights": "3",
+						"url_querystring_adults": "2",
+						"url_querystring_children": "0"
+					},
+					{
+						"@timestamp": "2015-06-17T13:53:39.999Z",
+						"type": "lr_varnish_request",
+						"url": "/beacon/hotelDetailsAccuracy?hotelId=195042&rate=501.01&searchId=1ec79c06-dd05-4f3d-8b9a-a7a49b142e05&date=1435878000&nights=3&adults=2&children=0",
+						"req_headers": {
+							"Referer": "http://www.laterooms.com/en/hotel-reservations/195042_hotel-cc-amsterdam.aspx"
+						},
+						"@type": "lr_varnish_request",
+						"url_querystring_hotelId": "195042",
+						"url_querystring_rate": "501.01",
+						"url_querystring_searchId": "1ec79c06-dd05-4f3d-8b9a-a7a49b142e05",
+						"url_querystring_date": "2015-07-03",
+						"url_querystring_nights": "3",
+						"url_querystring_adults": "2",
+						"url_querystring_children": "0"
+					}
+				]
+			}).then(function(result) {
+				expect(result.daysInFuture).to.be(2);
 				done();
 			});
 		});
