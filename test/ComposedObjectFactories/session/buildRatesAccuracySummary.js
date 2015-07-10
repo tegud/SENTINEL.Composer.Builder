@@ -50,4 +50,36 @@ describe('buildRatesAccuracySummary', function() {
 			]
 		}).failures).to.be(1);
 	});	
+
+	it('sets containsSearch to true', function() {
+		expect(buildSummary({ 
+			events: [
+				{ type: 'lr_varnish_request', url_page_type: 'search' }
+			]
+		}).containsSearch).to.be(true);
+	});
+
+	it('sets containsSearch to false', function() {
+		expect(buildSummary({ 
+			events: [
+				{ type: 'lr_varnish_request', url_page_type: 'hotel-details' }
+			]
+		}).containsSearch).to.be(false);
+	});
+
+	it('sets containsSearch to true', function() {
+		expect(buildSummary({ 
+			events: [
+				{ type: 'lr_varnish_request', url_page_type: 'hotel-details' }
+			]
+		}).containsHotelDetails).to.be(true);
+	});
+
+	it('sets containsSearch to true', function() {
+		expect(buildSummary({ 
+			events: [
+				{ type: 'lr_varnish_request', url_page_type: 'search' }
+			]
+		}).containsHotelDetails).to.be(false);
+	});
 });
