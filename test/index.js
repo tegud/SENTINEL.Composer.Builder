@@ -5,6 +5,7 @@ var EventEmitter = require('events').EventEmitter;
 var Promise = require('bluebird');
 var fs = require('fs');
 var fakeRedis = require('./fake-redis');
+var amqpSub = require('./amqp-sub');
 var Server = proxyquire('../lib/server', {
 	'./config': proxyquire('../lib/config', {
 		'../stores/redis': proxyquire('../lib/stores/redis', {
@@ -19,17 +20,6 @@ describe('Composer.Builder', function() {
 	var udpClient;
 	var server;
 	var port = 1234;
-
-	afterEach(function(done) {
-		udpClient.close();
-		eventEmitter.removeAllListeners();
-
-		server.stop().then(done.bind(undefined, undefined));
-
-		server = null;
-
-		fakeRedis.clearData();
-	});
 
 	function sendTest(testData, gapBetween) {
 		var currentTestItem = JSON.stringify(testData.shift());
@@ -85,7 +75,19 @@ describe('Composer.Builder', function() {
 		udpClient.send(expiredKeyMessage, 0, expiredKeyMessage.length, port, "localhost");
 	}
 
+
 	describe('event is inputted via udp', function() {
+		afterEach(function(done) {
+			udpClient.close();
+			eventEmitter.removeAllListeners();
+
+			server.stop().then(done.bind(undefined, undefined));
+
+			server = null;
+
+			fakeRedis.clearData();
+		});
+
 		beforeEach(function(done) {
 			server = new Server();
 
@@ -447,7 +449,92 @@ describe('Composer.Builder', function() {
 		});
 	});
 
+	describe('event is inputted via amqp', function() {
+		var inputExchange;
+		var handleTestResult;
+
+		function populateRedisAndSetExpiredKeyMessageViaAmqp(type, key, dataFile) {
+			var expiredKeyMessage = new Buffer(JSON.stringify(generateKeyObject(type, key)));
+			populateRedisData(type, key, dataFile);
+
+			inputExchange.publish('', expiredKeyMessage);
+		}
+
+		function doneExchangeRecievedMessage(routingKey, msg) {
+			var data = msg.data.toString('utf-8');
+			var parsedData = JSON.parse(data);
+			console.log('in');
+
+			if(parsedData.type !== 'session') {
+				return;
+			}
+
+			handleTestResult(parsedData);
+		}
+
+		afterEach(function(done) {
+			eventEmitter.removeAllListeners();
+
+			server.stop().then(done.bind(undefined, undefined));
+
+			server = null;
+
+			fakeRedis.clearData();
+		});
+
+		beforeEach(function(done) {
+			handleTestResult = function() {};
+
+			var mockAmqpServer = amqpSub.mock({ host: '127.0.0.1', port: 5672 })
+			inputExchange = mockAmqpServer.exchange('composer-expired');
+			outputExchange = mockAmqpServer.exchange('composer-done', doneExchangeRecievedMessage);
+
+			server = new Server();
+
+			server.loadConfig({
+				stores: {
+					'redis': {
+						type: 'redis',
+						host: '192.168.50.7',
+						port: 6379
+					}
+				},
+				listeners: [
+					{ type: 'amqp', "host": "127.0.0.1", "port": 5672, "exchange": "composer-expired", "routing": "expired", "queue": "composer-expired" }
+				],
+				publishers: [
+					{ type: 'amqp', "host": "127.0.0.1", "exchange": "composer-done" }
+				]
+			}).then(server.start).then(done);
+
+			eventEmitter = new EventEmitter();
+		});
+
+
+		describe('creates new session object', function() {
+			it('sets key', function(done) {
+				populateRedisAndSetExpiredKeyMessageViaAmqp('session', '104e9439-63de-4373-95ff-6dfa365e4951', 'three.json');
+
+				handleTestResult = function(parsedData) {
+					expect(parsedData.sessionId).to.be('104e9439-63de-4373-95ff-6dfa365e4951');
+					done();
+				};
+			});	
+		});	
+	});	
+
 	describe('config can be loaded from file', function() {
+		afterEach(function(done) {
+			udpClient.close();
+			eventEmitter.removeAllListeners();
+
+			server.stop().then(done.bind(undefined, undefined));
+
+			server = null;
+
+			fakeRedis.clearData();
+		});
+
 		beforeEach(function(done) {
 			server = new Server();
 
