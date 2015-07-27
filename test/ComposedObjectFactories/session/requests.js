@@ -256,5 +256,16 @@ describe('buildRequests', function() {
 				]
 			}).rateLimited).to.be(false);
 		});
+
+		it('lists unique list of flags triggered', function() {
+			expect(buildRequests({ 
+				events: [
+					{ type: 'lr_varnish_request', url_page_type: 'hotel-details', hotel_details_provider: 'HiltonOta', botBuster_limited: "false", botBuster_flag_tokens: "bad-ip, no-cookie" },
+					{ type: 'lr_varnish_request', url_page_type: 'hotel-details', botBuster_score: "0", botBuster_limited: "false", botBuster_flag_tokens: "bad-ip, no-referer" },
+					{ type: 'lr_errors', url_page_type: 'booking', botBuster_limited: "false" },
+					{ type: 'domain_events', domainEventType: 'booking made', botBuster_limited: "false" }
+				]
+			}).botBusterFlags).to.be("bad-ip, no-cookie, no-referer");
+		});
 	});
 });
