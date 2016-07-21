@@ -211,4 +211,61 @@ describe('buildRequests', function() {
 			]
 		}).providersEncountered).to.be('HiltonOta');
 	});
+
+	describe('rateLimiting', function() {
+		it('marks session as rateLimited if session contains request which would have been rateLimited', function() {
+			expect(buildRequests({ 
+				events: [
+					{ type: 'lr_varnish_request', url_page_type: 'hotel-details', hotel_details_provider: 'HiltonOta', botBuster_limited: "false" },
+					{ type: 'lr_varnish_request', url_page_type: 'hotel-details', botBuster_limited: "true" },
+					{ type: 'lr_errors', url_page_type: 'booking', botBuster_limited: "false" },
+					{ type: 'domain_events', domainEventType: 'booking made', botBuster_limited: "false" }
+				]
+			}).rateLimited).to.be(true);
+		});
+
+		it('marks session as rateLimited if session contains requests, which are not beacons, which would have been rateLimited', function() {
+			expect(buildRequests({ 
+				events: [
+					{ type: 'lr_varnish_request', url_page_type: 'hotel-details', hotel_details_provider: 'HiltonOta', botBuster_limited: "false" },
+					{ type: 'lr_varnish_request', url_page_type: 'hotel-details', botBuster_limited: "true", tags: ['beacon'] },
+					{ type: 'lr_errors', url_page_type: 'booking', botBuster_limited: "false" },
+					{ type: 'domain_events', domainEventType: 'booking made', botBuster_limited: "false" }
+				]
+			}).rateLimited).to.be(false);
+		});
+
+		it('sets limitedUrls to comma delimited list', function() {
+			expect(buildRequests({ 
+				events: [
+					{ type: 'lr_varnish_request', url: 'a', url_page_type: 'hotel-details', hotel_details_provider: 'HiltonOta', botBuster_limited: "false" },
+					{ type: 'lr_varnish_request', url: 'b', url_page_type: 'hotel-details', botBuster_limited: "true" },
+					{ type: 'lr_varnish_request', url: 'c', url_page_type: 'booking', botBuster_limited: "true" },
+					{ type: 'domain_events', domainEventType: 'booking made', botBuster_limited: "false" }
+				]
+			}).limitedUrls).to.be('b,c');
+		});
+
+		it('does not mark session as rateLimited if session contains no requests which would have been rateLimited', function() {
+			expect(buildRequests({ 
+				events: [
+					{ type: 'lr_varnish_request', url_page_type: 'hotel-details', hotel_details_provider: 'HiltonOta', botBuster_limited: "false" },
+					{ type: 'lr_varnish_request', url_page_type: 'hotel-details', botBuster_score: "0", botBuster_limited: "false" },
+					{ type: 'lr_errors', url_page_type: 'booking', botBuster_limited: "false" },
+					{ type: 'domain_events', domainEventType: 'booking made', botBuster_limited: "false" }
+				]
+			}).rateLimited).to.be(false);
+		});
+
+		it('lists unique list of flags triggered', function() {
+			expect(buildRequests({ 
+				events: [
+					{ type: 'lr_varnish_request', url_page_type: 'hotel-details', hotel_details_provider: 'HiltonOta', botBuster_limited: "false", botBuster_flag_tokens: "bad-ip, no-cookie" },
+					{ type: 'lr_varnish_request', url_page_type: 'hotel-details', botBuster_score: "0", botBuster_limited: "false", botBuster_flag_tokens: "bad-ip, no-referer" },
+					{ type: 'lr_errors', url_page_type: 'booking', botBuster_limited: "false" },
+					{ type: 'domain_events', domainEventType: 'booking made', botBuster_limited: "false" }
+				]
+			}).botBusterFlags).to.be("bad-ip, no-cookie, no-referer");
+		});
+	});
 });
