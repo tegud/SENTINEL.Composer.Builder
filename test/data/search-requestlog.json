@@ -1,0 +1,69 @@
+[{
+    "AlgorithmId": "92",
+    "SearchId": "e26afbf8-32db-48f3-8564-c8fdb531f817",
+    "TimeToGetFilterCountsInMs": 5,
+    "NumberOfHotelsToPromote": 1,
+    "NumberOfHotelsPromoted": 1,
+    "TimeToGetRatesInMs": 127,
+    "NumberOfRatesReceived": 24,
+    "NumberOfRatesRequested": 24,
+    "IsAPostcode": false,
+    "TimeToGetHotelScoreListInMs": 5,
+    "TimeToGetForGeoboundInMs": 9,
+    "SearchType": "sef_geobound",
+    "VariantName": "f0154fe0-9eb3-4368-9868-1e40e8330f9a",
+    "NewVariantAllocation": false,
+    "Geobound": {
+      "TopLeft": {
+        "Lat": 51.463616386550164,
+        "Long": -0.9525170001029437
+      },
+      "BottomRight": {
+        "Lat": 51.44382690079993,
+        "Long": -1.0090794238089984
+      }
+    },
+    "type": "searchengine",
+    "host": "TELAPP213P",
+    "RequestId": "e0f8f19a-6016-4b82-8276-42c913cb5d82",
+    "SessionId": "2ca9c9d1-7621-4890-ceda-456863cc508a",
+    "CallerInfo": {
+      "FilePath": "C:\\projects\\ocelog\\src\\Ocelog\\RequestLog.cs",
+      "LineNum": 35
+    },
+    "tags": [
+      "Info",
+      "Ocelog.RequestLog"
+    ],
+    "@version": 1,
+    "@timestamp": "2016-07-21T13:45:50.744Z",
+    "status": "-1",
+    "logstash_host": "12a4ae26794d"
+  },
+{
+    "AlgorithmId": "108",
+    "SearchId": "9eb44835-e2d8-46ce-bbf3-d13623330ef6",
+    "NumberOfHotelsToPromote": 2,
+    "NumberOfHotelsPromoted": 1,
+    "TimeToFindHotelsByDestinationNameInMs": 12,
+    "TimeToGetDestinationDocumentByDestinationIdInMs": 2,
+    "VariantName": "f0154fe0-9eb3-4368-9868-1e40e8330f9a",
+    "NewVariantAllocation": false,
+    "KeywordId": "16294936",
+    "type": "searchengine",
+    "host": "TELAPP211P",
+    "RequestId": "45be605c-125b-4762-b04c-40e8a578e1d3",
+    "SessionId": "3daff88b-cadd-46e0-68f9-f40784ebce15",
+    "CallerInfo": {
+      "FilePath": "C:\\projects\\ocelog\\src\\Ocelog\\RequestLog.cs",
+      "LineNum": 35
+    },
+    "tags": [
+      "Info",
+      "Ocelog.RequestLog"
+    ],
+    "@version": 1,
+    "@timestamp": "2016-07-21T13:45:48.337Z",
+    "status": "-1",
+    "logstash_host": "12a4ae26794d"
+  }]
