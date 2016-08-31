@@ -9,15 +9,31 @@ describe('buildRequests', function() {
 	});
 
 	it('sets inMoonStickBeta to true when non-homepage request has is_moonstick as true', function() {
-		expect(buildRequests({ 
+		expect(buildRequests({
 			events: [
 				{ type: 'lr_varnish_request', url_page_type: 'search', is_moonstick: true }
 			]
 		}).inMoonstickBeta).to.be(true);
 	});
 
+	it('sets visited sale page to true when request with url_page_type sale included in logs', function() {
+		expect(buildRequests({
+			events: [
+				{ type: 'lr_varnish_request', url_page_type: 'sale' }
+			]
+		}).visitedSalePage).to.be(true);
+	});
+
+	it('sets visited sale page to false when no requests with url_page_type sale included in logs', function() {
+		expect(buildRequests({
+			events: [
+				{ type: 'lr_varnish_request', url_page_type: 'home' }
+			]
+		}).visitedSalePage).to.be(false);
+	});
+
 	it('sets inMoonStickBeta to false when only non-homepage request has is_moonstick as true', function() {
-		expect(buildRequests({ 
+		expect(buildRequests({
 			events: [
 				{ type: 'lr_varnish_request', url_page_type: 'home', is_moonstick: true }
 			]
@@ -25,7 +41,7 @@ describe('buildRequests', function() {
 	});
 
 	it('sets inMoonStickBeta to true when non-homepage request has is_moonstick as "true"', function() {
-		expect(buildRequests({ 
+		expect(buildRequests({
 			events: [
 				{ type: 'lr_varnish_request', url_page_type: 'search', is_moonstick: "true" }
 			]
@@ -33,7 +49,7 @@ describe('buildRequests', function() {
 	});
 
 	it('sets auVisitor to true when au host is present on a request', function() {
-		expect(buildRequests({ 
+		expect(buildRequests({
 			events: [
 				{ type: 'lr_varnish_request', url_page_type: 'search', req_headers: { Host: 'www.laterooms.com.au' } }
 			]
@@ -41,7 +57,7 @@ describe('buildRequests', function() {
 	});
 
 	it('sets asiaRoomsVisitor to false when no header indicates it came from asia rooms', function() {
-		expect(buildRequests({ 
+		expect(buildRequests({
 			events: [
 				{ type: 'lr_varnish_request', url_page_type: 'search' }
 			]
@@ -49,7 +65,7 @@ describe('buildRequests', function() {
 	});
 
 	it('sets asiaRoomsVisitor to true when header indicates it came from asia rooms as a string', function() {
-		expect(buildRequests({ 
+		expect(buildRequests({
 			events: [
 				{ type: 'lr_varnish_request', url_page_type: 'search', resp_headers: { 'x_debug_redirectedFromAsiarooms': 'true' } }
 			]
@@ -57,7 +73,7 @@ describe('buildRequests', function() {
 	});
 
 	it('sets asiaRoomsVisitor to true when header indicates it came from asia rooms as a boolean', function() {
-		expect(buildRequests({ 
+		expect(buildRequests({
 			events: [
 				{ type: 'lr_varnish_request', url_page_type: 'search', resp_headers: { 'x_debug_redirectedFromAsiarooms': true } }
 			]
@@ -65,7 +81,7 @@ describe('buildRequests', function() {
 	});
 
 	it('sets auVisitor to false when au host is present on no requests', function() {
-		expect(buildRequests({ 
+		expect(buildRequests({
 			events: [
 				{ type: 'lr_varnish_request', url_page_type: 'search', req_headers: { Host: 'www.laterooms.com' } }
 			]
@@ -74,7 +90,7 @@ describe('buildRequests', function() {
 
 	describe('sets enteredFunnelAt', function() {
 		it('when there are no funnel requests, it sets the enteredFunnelAt to none', function() {
-			expect(buildRequests({ 
+			expect(buildRequests({
 				events: [
 					{ type: 'lr_varnish_request', url_page_type: 'anotherpage.mvc' }
 				]
@@ -82,7 +98,7 @@ describe('buildRequests', function() {
 		});
 
 		it('when first request is home, it sets the enteredFunnelAt to home', function() {
-			expect(buildRequests({ 
+			expect(buildRequests({
 				events: [
 					{ type: 'lr_varnish_request', url_page_type: 'home' },
 					{ type: 'lr_varnish_request', url_page_type: 'search' }
@@ -91,7 +107,7 @@ describe('buildRequests', function() {
 		});
 
 		it('when first request is hotel-details, it sets the enteredFunnelAt to hotel-details', function() {
-			expect(buildRequests({ 
+			expect(buildRequests({
 				events: [
 					{ type: 'lr_varnish_request', url_page_type: 'hotel-details' },
 					{ type: 'lr_varnish_request', url_page_type: 'search' }
@@ -100,7 +116,7 @@ describe('buildRequests', function() {
 		});
 
 		it('when first request is search, it sets the enteredFunnelAt to search', function() {
-			expect(buildRequests({ 
+			expect(buildRequests({
 				events: [
 					{ type: 'lr_varnish_request', url_page_type: 'search' },
 					{ type: 'lr_varnish_request', url_page_type: 'hotel-details' }
@@ -109,7 +125,7 @@ describe('buildRequests', function() {
 		});
 
 		it('when booking journey event has occurred, it sets the funnelEnteredAt to booking', function() {
-			expect(buildRequests({ 
+			expect(buildRequests({
 				events: [
 					{ type: 'domain_events', domainEventType: 'booking journey event' },
 					{ type: 'lr_varnish_request', url_page_type: 'search' },
@@ -120,7 +136,7 @@ describe('buildRequests', function() {
 
 	describe('sets exitedFunnelAt', function() {
 		it('when there are no funnel requests, it sets the exitedFunnelAt to none', function() {
-			expect(buildRequests({ 
+			expect(buildRequests({
 				events: [
 					{ type: 'lr_varnish_request', url_page_type: 'anotherpage.mvc' }
 				]
@@ -128,7 +144,7 @@ describe('buildRequests', function() {
 		});
 
 		it('when last request is home, it sets the exitedFunnelAt to home', function() {
-			expect(buildRequests({ 
+			expect(buildRequests({
 				events: [
 					{ type: 'lr_varnish_request', url_page_type: 'home' }
 				]
@@ -136,7 +152,7 @@ describe('buildRequests', function() {
 		});
 
 		it('when last request is hotel-details, it sets the exitedFunnelAt to hotel-details', function() {
-			expect(buildRequests({ 
+			expect(buildRequests({
 				events: [
 					{ type: 'lr_varnish_request', url_page_type: 'hotel-details' }
 				]
@@ -144,7 +160,7 @@ describe('buildRequests', function() {
 		});
 
 		it('when last request is search, it sets the exitedFunnelAt to search', function() {
-			expect(buildRequests({ 
+			expect(buildRequests({
 				events: [
 					{ type: 'lr_varnish_request', url_page_type: 'search' }
 				]
@@ -152,7 +168,7 @@ describe('buildRequests', function() {
 		});
 
 		it('when booking error has occurred, it sets the exitedFunelAt to booking', function() {
-			expect(buildRequests({ 
+			expect(buildRequests({
 				events: [
 					{ type: 'lr_varnish_request', url_page_type: 'search' },
 					{ type: 'lr_errors', url_page_type: 'booking' }
@@ -161,7 +177,7 @@ describe('buildRequests', function() {
 		});
 
 		it('when booking journey event has occurred, it sets the exitedFunelAt to booking', function() {
-			expect(buildRequests({ 
+			expect(buildRequests({
 				events: [
 					{ type: 'lr_varnish_request', url_page_type: 'search' },
 					{ type: 'domain_events', domainEventType: 'booking journey event' }
@@ -170,7 +186,7 @@ describe('buildRequests', function() {
 		});
 
 		it('when booking has completed, it sets the exitedFunelAt to booking-confirmation', function() {
-			expect(buildRequests({ 
+			expect(buildRequests({
 				events: [
 					{ type: 'lr_varnish_request', url_page_type: 'search' },
 					{ type: 'lr_errors', url_page_type: 'booking' },
@@ -181,7 +197,7 @@ describe('buildRequests', function() {
 	});
 
 	it('when hotel details page has been visited with provider specified, it adds it to the list of providers session has encountered', function() {
-		expect(buildRequests({ 
+		expect(buildRequests({
 			events: [
 				{ type: 'lr_varnish_request', url_page_type: 'hotel-details', hotel_details_provider: 'LateRooms' },
 				{ type: 'lr_errors', url_page_type: 'booking' },
@@ -191,7 +207,7 @@ describe('buildRequests', function() {
 	});
 
 	it('when multiple hotel details pages have been visited with different provider specifieds, it adds them to the list of providers session has encountered', function() {
-		expect(buildRequests({ 
+		expect(buildRequests({
 			events: [
 				{ type: 'lr_varnish_request', url_page_type: 'hotel-details', hotel_details_provider: 'LateRooms' },
 				{ type: 'lr_varnish_request', url_page_type: 'hotel-details', hotel_details_provider: 'HiltonOta' },
@@ -202,7 +218,7 @@ describe('buildRequests', function() {
 	});
 
 	it('when multiple hotel details pages have been visited with the same provider specified, it does not add duplicates to the list of providers session has encountered', function() {
-		expect(buildRequests({ 
+		expect(buildRequests({
 			events: [
 				{ type: 'lr_varnish_request', url_page_type: 'hotel-details', hotel_details_provider: 'HiltonOta' },
 				{ type: 'lr_varnish_request', url_page_type: 'hotel-details', hotel_details_provider: 'HiltonOta' },
@@ -214,7 +230,7 @@ describe('buildRequests', function() {
 
 	describe('rateLimiting', function() {
 		it('marks session as rateLimited if session contains request which would have been rateLimited', function() {
-			expect(buildRequests({ 
+			expect(buildRequests({
 				events: [
 					{ type: 'lr_varnish_request', url_page_type: 'hotel-details', hotel_details_provider: 'HiltonOta', botBuster_limited: "false" },
 					{ type: 'lr_varnish_request', url_page_type: 'hotel-details', botBuster_limited: "true" },
@@ -225,7 +241,7 @@ describe('buildRequests', function() {
 		});
 
 		it('marks session as rateLimited if session contains requests, which are not beacons, which would have been rateLimited', function() {
-			expect(buildRequests({ 
+			expect(buildRequests({
 				events: [
 					{ type: 'lr_varnish_request', url_page_type: 'hotel-details', hotel_details_provider: 'HiltonOta', botBuster_limited: "false" },
 					{ type: 'lr_varnish_request', url_page_type: 'hotel-details', botBuster_limited: "true", tags: ['beacon'] },
@@ -236,7 +252,7 @@ describe('buildRequests', function() {
 		});
 
 		it('sets limitedUrls to comma delimited list', function() {
-			expect(buildRequests({ 
+			expect(buildRequests({
 				events: [
 					{ type: 'lr_varnish_request', url: 'a', url_page_type: 'hotel-details', hotel_details_provider: 'HiltonOta', botBuster_limited: "false" },
 					{ type: 'lr_varnish_request', url: 'b', url_page_type: 'hotel-details', botBuster_limited: "true" },
@@ -247,7 +263,7 @@ describe('buildRequests', function() {
 		});
 
 		it('does not mark session as rateLimited if session contains no requests which would have been rateLimited', function() {
-			expect(buildRequests({ 
+			expect(buildRequests({
 				events: [
 					{ type: 'lr_varnish_request', url_page_type: 'hotel-details', hotel_details_provider: 'HiltonOta', botBuster_limited: "false" },
 					{ type: 'lr_varnish_request', url_page_type: 'hotel-details', botBuster_score: "0", botBuster_limited: "false" },
@@ -258,7 +274,7 @@ describe('buildRequests', function() {
 		});
 
 		it('lists unique list of flags triggered', function() {
-			expect(buildRequests({ 
+			expect(buildRequests({
 				events: [
 					{ type: 'lr_varnish_request', url_page_type: 'hotel-details', hotel_details_provider: 'HiltonOta', botBuster_limited: "false", botBuster_flag_tokens: "bad-ip, no-cookie" },
 					{ type: 'lr_varnish_request', url_page_type: 'hotel-details', botBuster_score: "0", botBuster_limited: "false", botBuster_flag_tokens: "bad-ip, no-referer" },
