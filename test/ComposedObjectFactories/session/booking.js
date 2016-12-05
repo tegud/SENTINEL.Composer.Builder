@@ -10,4 +10,12 @@ describe('buildBooking', function() {
 			]
 		}).numberOfBookings).to.be(2);
 	});	
+	it('sets bookingIds to the list of bookindIds', function() {
+		expect(buildBooking({
+			events: [
+				{ "type": "domain_events", "domainEventType": "booking made", "bookingId": 33037395 },
+				{ "type": "domain_events", "domainEventType": "booking made", "bookingId": 33037859 }
+			]
+		}).bookingIds).to.eql([33037395, 33037859]);
+	});	
 });
