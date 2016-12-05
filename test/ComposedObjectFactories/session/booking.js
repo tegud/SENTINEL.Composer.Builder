@@ -9,13 +9,23 @@ describe('buildBooking', function() {
 				{ "type": "domain_events", "domainEventType": "booking made" }
 			]
 		}).numberOfBookings).to.be(2);
-	});	
-	it('sets bookingIds to the list of bookindIds', function() {
+	});
+	it('sets bookingIds to the list of bookingIds', function() {
 		expect(buildBooking({
 			events: [
 				{ "type": "domain_events", "domainEventType": "booking made", "bookingId": 33037395 },
 				{ "type": "domain_events", "domainEventType": "booking made", "bookingId": 33037859 }
 			]
 		}).bookingIds).to.eql([33037395, 33037859]);
+	});	
+	it('sets enquiryIds to the list of enquiry Ids', function() {
+		expect(buildBooking({
+			events: [
+				{ "type": "domain_events", "domainEventType": "booking made", "bookingId": 33037395 },
+				{ "type": "domain_events", "domainEventType": "booking made", "bookingId": 33037859 },
+				{ "type": "reservations_monitoring", "message": { "body": { "EnquiryGuid": "79750000-5683-0050-4d35-08d41d098dfd"}} },
+				{ "type": "reservations_monitoring", "message": { "body": { "EnquiryGuid": "71e95f03-6f9e-4ca2-83fb-7b7f1a04c341"}} },
+			]
+		}).enquiryIds).to.eql(["79750000-5683-0050-4d35-08d41d098dfd", "71e95f03-6f9e-4ca2-83fb-7b7f1a04c341"]);
 	});	
 });
